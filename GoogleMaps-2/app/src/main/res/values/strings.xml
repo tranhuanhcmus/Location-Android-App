@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GoogleMaps</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="API_KEY">AIzaSyASA2z4V1opdbJhR59K4pqvosU7Ngfko_0</string>
+    <string name="API_KEY">AIzaSyDKj-5hQcFgnC2QcR5W_ClhgWVz6HC8-FA</string>
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="action_sign_in">Sign in or register</string>

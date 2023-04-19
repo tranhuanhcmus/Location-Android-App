@@ -1,12 +1,16 @@
 package com.example.googlemaps;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class InfoSearching {
 
     private String name;
     private String address;
     private int distance;
 
-    InfoSearching(String name, String address, int distance){
+    public LatLng position;
+
+    public InfoSearching(String name, String address, int distance){
         this.distance = distance;
         this.address = address;
         this.name = name;

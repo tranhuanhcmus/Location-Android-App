@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -15,67 +16,346 @@
         tools:context=".MapsActivity"
         />
 
-    <RelativeLayout
-        android:id="@+id/relative1"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginVertical="10dp"
-        android:layout_marginHorizontal="20dp"
-        android:background="@drawable/custom_widgets">
+        android:orientation="vertical"
+        android:id="@+id/relative">
+
+        <LinearLayout
+            android:id="@+id/relative1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/custom_widgets">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal"
+                android:id="@+id/linear1"
+                >
+
+                <ImageView
+                    android:id="@+id/iconSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_search"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="10dp"
+                    android:onClick="callGeoLocateForOnclick"
+                    />
+
+                <AutoCompleteTextView
+                    android:id="@+id/textSearch"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:hint="Tìm kiếm tại đây"
+                    android:textColorHint="#0A9877"
+                    android:textColor="#0A9877"
+                    android:background="@null"
+                    android:imeOptions="actionSearch"
+                    android:singleLine="true"
+                    android:completionThreshold="1"
+                    />
+
+                <ImageView
+                    android:id="@+id/micro"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_micro"
+                    android:layout_gravity="center_vertical"
+
+                    />
+
+                <ImageView
+                    android:id="@+id/clearText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_x"
+                    android:layout_gravity="center_vertical"
+                    android:onClick="clearText"
+
+                    />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/relative2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:backgroundTint="#FFFFFF"
+            android:background="@drawable/background_infodetails">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:id="@+id/linear2"
+                android:layout_marginTop="5dp"
+                android:layout_marginHorizontal="10dp"
+                >
+
+                <ImageView
+                    android:id="@+id/back"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:src="@mipmap/ic_back"
+                    android:layout_marginTop="10dp"
+                    android:onClick="backDirection"/>
+
+                <LinearLayout
+                    android:layout_marginTop="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/textSearchOrigin"
+                            android:layout_width="270dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
+                            android:hint="Vị trí của bạn"
+                            android:textColorHint="#242E2C"
+                            android:textColor="#242E2C"
+                            android:background="@drawable/custom_button2"
+                            android:imeOptions="actionSearch"
+                            android:singleLine="true"
+                            android:completionThreshold="1"
+                            android:paddingLeft="10dp"
+                            />
+
+                        <ImageView
+                            android:id="@+id/micro1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_micro"
+                            android:layout_gravity="center_vertical"
+                             />
+
+                        <ImageView
+                            android:id="@+id/clearText1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_x"
+                            android:layout_gravity="center_vertical"
+                            android:onClick="clearText"
+                             />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginTop="5dp">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/textSearchDest"
+                            android:layout_width="270dp"
+                            android:layout_height="40dp"
+                            android:layout_gravity="center_vertical"
+                            android:hint="Điểm đến"
+                            android:textColorHint="#242E2C"
+                            android:textColor="#242E2C"
+                            android:background="@drawable/custom_button2"
+                            android:imeOptions="actionSearch"
+                            android:singleLine="true"
+                            android:completionThreshold="1"
+                            android:paddingLeft="10dp"
+                            />
+
+                        <ImageView
+                            android:id="@+id/micro2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_micro"
+                            android:layout_gravity="center_vertical"
+                             />
+
+                        <ImageView
+                            android:id="@+id/clearText2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_x"
+                            android:layout_gravity="center_vertical"
+                            android:onClick="clearText"
+                             />
+
+                    </LinearLayout>
+
+
+
+                </LinearLayout>
+
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_marginHorizontal="10dp">
+
+                <LinearLayout
+                    android:id="@+id/car"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:onClick="onClickTrafficMode"
+                    >
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@mipmap/ic_car"/>
+                    <TextView
+                        android:id="@+id/timeCar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/moto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:onClick="onClickTrafficMode">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@mipmap/ic_moto"/>
+                    <TextView
+                        android:id="@+id/timeMoto"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/bus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:onClick="onClickTrafficMode">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@mipmap/ic_bus"/>
+                    <TextView
+                        android:id="@+id/timeBus"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/walk"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="horizontal"
+                    android:onClick="onClickTrafficMode">
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:src="@mipmap/ic_walk"/>
+                    <TextView
+                        android:id="@+id/timeWalk"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="--"
+                        android:layout_gravity="center_vertical"
+                        android:textColor="@color/black"
+                        android:textSize="16dp"
+                        />
+
+                </LinearLayout>
+
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
             android:orientation="horizontal"
-            android:id="@+id/linear1"
-            >
+            android:id="@+id/history">
 
-            <ImageView
-                android:id="@+id/iconSearch"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_search"
-                android:layout_gravity="center_vertical"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="10dp"
-                android:onClick="callGeoLocateForOnclick"
+                android:text="Lịch sử tìm kiếm"
+                android:padding="10dp"
+                android:textColor="@color/green1"
+                android:textSize="18dp"
+                android:layout_weight="1"
                 />
-
-            <AutoCompleteTextView
-                android:id="@+id/textSearch"
-                android:layout_width="250dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:hint="Tìm kiếm tại đây"
-                android:textColorHint="#0A9877"
-                android:textColor="#0A9877"
-                android:background="@null"
-                android:imeOptions="actionSearch"
-                android:singleLine="true"
-                android:completionThreshold="1"
-                />
-
-            <!--            <fragment android:id="@+id/autocomplete_fragment"-->
-            <!--                android:layout_width="match_parent"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"-->
-            <!--                />-->
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/ic_micro"
-                android:layout_gravity="center_vertical"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:id="@+id/visibility"
+                android:src="@mipmap/ic_visibility"
+                android:layout_gravity="end"
+                android:onClick="visibility"/>
 
-                />
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:id="@+id/visibility_off"
+                android:src="@mipmap/ic_visibility_off"
+                android:layout_gravity="right"
+                android:onClick="visibility"/>
+
         </LinearLayout>
-    </RelativeLayout>
 
+
+
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/listViewSearch"
+            android:background="@color/white"/>
+
+    </LinearLayout>
 
     <ImageView
         android:id="@+id/gps"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/relative1"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/relative"
         android:layout_alignParentRight="true"
         android:layout_margin="15dp"
         android:src="@drawable/ic_gps"
@@ -84,6 +364,26 @@
         android:onClick="handleGps"
         />
 
+    <ImageView
+        android:id="@+id/favourite"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/gps"
+        android:layout_alignParentRight="true"
+        android:layout_margin="15dp"
+        android:src="@mipmap/ic_bookmark"
 
+        />
+
+
+
+    <FrameLayout
+        android:id="@+id/fragmentInfo"
+        android:layout_width="match_parent"
+        android:layout_height="180dp"
+        android:layout_alignParentBottom="true"
+        android:background="@color/White"
+
+        />
 </RelativeLayout>
 
