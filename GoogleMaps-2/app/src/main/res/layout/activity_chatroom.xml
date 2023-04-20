@@ -12,10 +12,13 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:id="@+id/chatmessage_recycler_view">
+                android:id="@+id/chatmessage_recycler_view"
+              />
 
 
-            </androidx.recyclerview.widget.RecyclerView>
+
+
+
 
         </RelativeLayout>
 
@@ -31,7 +34,7 @@
                 android:layout_height="40dp"
                 android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:src="@drawable/icon_check_green"
+                android:src="@drawable/send_msg_icon"
                 android:id="@+id/checkmark"/>
 
             <EditText

@@ -26,15 +26,14 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentActivity;
 
 import com.example.googlemaps.Adapter.AutoCompleteAdapter;
+import com.example.googlemaps.Fragments.UserListFragment;
 import com.example.googlemaps.databinding.ActivityMapsBinding;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -253,9 +252,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1 );
                     Address address = addresses.get(0);
                     String marketAddress = address.getAddressLine(0);
-
-
-
 
                 } catch (IOException e) {
                     throw new RuntimeException(e);
