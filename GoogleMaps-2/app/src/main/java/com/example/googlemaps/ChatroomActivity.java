@@ -1,5 +1,6 @@
 package com.example.googlemaps;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -256,6 +257,7 @@ public class ChatroomActivity extends AppCompatActivity implements
                 .document(FirebaseAuth.getInstance().getUid());
 
         joinChatroomRef.delete();
+        startActivity(new Intent(this, HomeActivity.class));
     }
 
     private void joinChatroom(){
