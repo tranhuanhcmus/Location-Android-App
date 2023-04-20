@@ -93,29 +93,29 @@ public class LoginActivity extends AppCompatActivity implements
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
                     Toast.makeText(LoginActivity.this, "Authenticated with: " + user.getEmail(), Toast.LENGTH_SHORT).show();
 
-//                    FirebaseFirestore db = FirebaseFirestore.getInstance();
-//                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
-//                            .build();
-//                    db.setFirestoreSettings(settings);
-//
-//                    DocumentReference userRef = db.collection(getString(R.string.collection_users))
-//                            .document(user.getUid());
-//
-//                    userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-//                        @Override
-//                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-//                            if(task.isSuccessful()){
-//                                Log.d(TAG, "onComplete: successfully set the user client.");
-//                                User user = task.getResult().toObject(User.class);
-//
-//                                // set value for another activity
-//                                UserClient applicationContext = (UserClient) getApplicationContext();
-//                                applicationContext.setUser(user);
-//                                //Log.i(TAG,user.toString());
-//                               // ((UserClient)((Activity) context).setUser(user);
-//                            }
-//                        }
-//                    });
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                            .build();
+                    db.setFirestoreSettings(settings);
+
+                    DocumentReference userRef = db.collection(getString(R.string.collection_users))
+                            .document(user.getUid());
+
+                    userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()){
+                                Log.d(TAG, "onComplete: successfully set the user client.");
+                                User user = task.getResult().toObject(User.class);
+
+                                // set value for another activity
+                                UserClient applicationContext = (UserClient) getApplicationContext();
+                                applicationContext.setUser(user);
+                                //Log.i(TAG,user.toString());
+                               // ((UserClient)((Activity) context).setUser(user);
+                            }
+                        }
+                    });
 
                     try {
                         TimeUnit.SECONDS.sleep(2);
