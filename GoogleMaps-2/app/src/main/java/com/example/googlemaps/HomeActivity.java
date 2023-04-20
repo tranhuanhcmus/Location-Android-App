@@ -1,8 +1,11 @@
 package com.example.googlemaps;
 
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -15,21 +18,30 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.googlemaps.Adapter.ChatroomRecyclerAdapter;
 import com.example.googlemaps.model.ChatRoom;
+import com.example.googlemaps.model.User;
+import com.example.googlemaps.model.UserClient;
+import com.example.googlemaps.model.UserLocation;
+import com.example.googlemaps.services.LocationService;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -39,7 +51,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.annotation.Nullable;
-
+import android.Manifest;
 
 public class HomeActivity extends AppCompatActivity implements
         View.OnClickListener,
@@ -59,6 +71,9 @@ public class HomeActivity extends AppCompatActivity implements
     private FirebaseFirestore mDb;
     private boolean mLocationPermissionGranted = false;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    private UserLocation mUserLocation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +84,8 @@ public class HomeActivity extends AppCompatActivity implements
         findViewById(R.id.fab_create_chatroom).setOnClickListener(this);
 
         mDb = FirebaseFirestore.getInstance();
+
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         initSupportActionBar();
         initChatroomRecyclerView();
@@ -179,7 +196,33 @@ public class HomeActivity extends AppCompatActivity implements
 //
 //    }
 
+    private void startLocationService(){
+        if(!isLocationServiceRunning()){
+            Intent serviceIntent = new Intent(this, LocationService.class);
+//        this.startService(serviceIntent);
 
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O){
+                this.startForegroundService(serviceIntent);
+            }else{
+                startService(serviceIntent);
+            }
+        }
+    }
+
+    private boolean isLocationServiceRunning() {
+        ActivityManager manager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        Log.d(TAG, "size ActivityManager: "+manager.getRunningServices(Integer.MAX_VALUE).size());
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+            Log.d(TAG, "className:"+service.service.getClassName());
+            if("com.example.googlemaps.services.LocationService".equals(service.service.getClassName())) {
+                Log.d(TAG, "isLocationServiceRunning: location service is already running.");
+                return true;
+            }
+        }
+        Log.d(TAG, "isLocationServiceRunning: location service is not running.");
+
+        return false;
+    }
     private void initSupportActionBar() {
         setTitle("ChatRooms");
     }
@@ -200,6 +243,8 @@ public class HomeActivity extends AppCompatActivity implements
         mChatroomRecyclerView.setAdapter(mChatroomRecyclerAdapter);
         mChatroomRecyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
+
+
 
     private void getChatrooms() {
 
@@ -303,6 +348,90 @@ public class HomeActivity extends AppCompatActivity implements
         builder.show();
     }
 
+
+    //on app resume, get User from database and add to SingleTon UserClient of the application
+    private void getUserDetails(){
+        if(mUserLocation == null){
+            mUserLocation = new UserLocation();
+            DocumentReference userRef = mDb.collection(getString(R.string.collection_users))
+                    .document(FirebaseAuth.getInstance().getUid());
+
+            userRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()){
+                        Log.d(TAG, "onComplete: successfully set the user client.");
+                        User user = task.getResult().toObject(User.class);
+                        mUserLocation.setUser(user);
+                        ((UserClient)(getApplicationContext())).setUser(user);
+
+                        getLastKnownLocation();
+                    }
+                }
+            });
+        }
+        else{
+            getLastKnownLocation();
+        }
+    }
+
+    private void saveUserLocation(){
+        if(mUserLocation != null){
+            DocumentReference locationRef = mDb
+                    .collection("User Locations")
+                    .document(FirebaseAuth.getInstance().getUid());
+
+            locationRef.set(mUserLocation).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    if(task.isSuccessful()){
+                        Log.d(TAG, "saveUserLocation: \ninserted user location into database." +
+                                "\n latitude: " + mUserLocation.getGeo_point().getLatitude() +
+                                "\n longitude: " + mUserLocation.getGeo_point().getLongitude());
+                    }
+                }
+            });
+        }
+    }
+
+    private void getLastKnownLocation() {
+        Log.d(TAG, "getLastKnownLocation: called.");
+
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            return;
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG,"cant access location");
+            return;
+        }
+        mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+
+                if (task.isSuccessful()) {
+                    Location location = task.getResult();
+                    if(
+                            task.getResult()==null
+                    )
+                        Log.d(TAG,"can not get location");
+
+                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                    mUserLocation.setGeo_point(geoPoint);
+                    mUserLocation.setTimestamp(null);
+
+                   saveUserLocation();
+                   startLocationService();
+
+
+                }
+            }
+        });
+
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -316,6 +445,9 @@ public class HomeActivity extends AppCompatActivity implements
 
         super.onResume();
         getChatrooms();
+        // (getUserDetails) Lấy data của user  -> lấy vị trí hiện tại -> save vào database
+        getUserDetails();
+
 
     }
 
@@ -351,10 +483,10 @@ public class HomeActivity extends AppCompatActivity implements
                 startActivity(new Intent(this, MapsActivity.class));
                 return true;
             }
-//            case R.id.action_profile:{
-//                startActivity(new Intent(this, ProfileActivity.class));
-//                return true;
-//            }
+            case R.id.action_profile:{
+                startActivity(new Intent(this, ProfileActivity.class));
+                return true;
+            }
             default: {
                 return super.onOptionsItemSelected(item);
             }

@@ -32,12 +32,16 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+
+
+import com.example.googlemaps.Adapter.AutoCompleteAdapter;
+import com.example.googlemaps.Fragments.UserListFragment;
+
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.googlemaps.Adapter.AutoCompleteAdapter;
@@ -48,6 +52,7 @@ import com.example.googlemaps.Direction.Route;
 import com.example.googlemaps.InfoPlace.FragmentInfo;
 import com.example.googlemaps.InfoPlace.MainCallbacks;
 import com.example.googlemaps.InfoPlace.infoPlace;
+
 import com.example.googlemaps.databinding.ActivityMapsBinding;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -552,6 +557,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onMarkerClick(@NonNull Marker marker) {
                 String TAG = "onMakerClick";
 
+
                 String name = marker.getTitle();
                 Log.e(TAG, "onMarkerClick: " + name );
 
@@ -604,8 +610,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }).addOnFailureListener((exception) -> {
                     Log.e("Error", "Error getting autocomplete predictions", exception);
                 });
-
-
 
                 return true;
             }

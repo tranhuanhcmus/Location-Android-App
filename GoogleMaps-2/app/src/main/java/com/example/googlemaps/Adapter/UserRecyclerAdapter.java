@@ -15,11 +15,12 @@ import java.util.ArrayList;
 
 public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapter.ViewHolder>{
 
-    private ArrayList<User> mUsers = new ArrayList<>();
+    private ArrayList<User> mUsers ;
+    private  UserListRecyclerClickListener mClickListener;
 
-
-    public UserRecyclerAdapter(ArrayList<User> users) {
+    public UserRecyclerAdapter(ArrayList<User> users,UserListRecyclerClickListener clickListener) {
         this.mUsers = users;
+        this.mClickListener=clickListener;
     }
 
 
@@ -27,7 +28,7 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_list_layout, parent, false);
-        final ViewHolder holder = new ViewHolder(view);
+        final ViewHolder holder = new ViewHolder(view,mClickListener);
         return holder;
     }
 
@@ -43,19 +44,27 @@ public class UserRecyclerAdapter extends RecyclerView.Adapter<UserRecyclerAdapte
         return mUsers.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener
     {
         TextView username, email;
-
-        public ViewHolder(View itemView) {
+        UserListRecyclerClickListener mUserRecyclerClickListener;
+        public ViewHolder(View itemView, UserListRecyclerClickListener clickListener) {
             super(itemView);
             username = itemView.findViewById(R.id.username);
             email = itemView.findViewById(R.id.email);
+            mUserRecyclerClickListener =clickListener;
+            itemView.setOnClickListener(this);
         }
 
 
+        @Override
+        public void onClick(View v) {
+            mUserRecyclerClickListener.onUserClick(getAdapterPosition());
+        }
     }
-
+    public interface UserListRecyclerClickListener{
+        void onUserClick(int position);
+    }
 }
 
 

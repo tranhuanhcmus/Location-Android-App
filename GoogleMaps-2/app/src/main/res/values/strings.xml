@@ -1,7 +1,9 @@
 <resources>
     <string name="app_name">GoogleMaps</string>
     <string name="title_activity_maps">MapsActivity</string>
-    <string name="API_KEY">AIzaSyDKj-5hQcFgnC2QcR5W_ClhgWVz6HC8-FA</string>
+
+    <string name="API_KEY">AIzaSyDy-o4RmSwJTV2kjhr3pmADv05MdUaWk34</string>
+
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="action_sign_in">Sign in or register</string>
@@ -23,6 +25,15 @@
 
     <!-- Firestore Strings -->
     <string name="collection_users">Users</string>
+    <string name="collection_chatrooms">Chatrooms</string>
+    <string name="collection_chat_messages">Chat Messages</string>
+    <string name="collection_chatroom_user_list">User List</string>
+    <string name="collection_user_locations">User Locations</string>
+
+
+    <!-- Fragments Names -->
+    <string name="fragment_user_list">User List</string>
+    <string name="fragment_image_list">Image List</string>
 
 
 

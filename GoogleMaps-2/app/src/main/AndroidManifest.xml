@@ -6,7 +6,8 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -21,6 +22,7 @@
         <activity android:name=".ChatroomActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".HomeActivity" />
+        <activity android:name=".ProfileActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -43,6 +45,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".services.LocationService"
+            android:stopWithTask="true"/>
     </application>
 
 </manifest>

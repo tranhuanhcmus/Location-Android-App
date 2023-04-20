@@ -17,16 +17,24 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.googlemaps.Adapter.ChatMessageRecyclerAdapter;
+import com.example.googlemaps.Fragments.UserListFragment;
 import com.example.googlemaps.model.ChatRoom;
 import com.example.googlemaps.model.Message;
 import com.example.googlemaps.model.User;
 import com.example.googlemaps.model.UserClient;
+import com.example.googlemaps.model.UserLocation;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
@@ -57,6 +65,7 @@ public class ChatroomActivity extends AppCompatActivity implements
     private ArrayList<Message> mMessages = new ArrayList<>();
     private Set<String> mMessageIds = new HashSet<>();
     private ArrayList<User> mUserList = new ArrayList<>();
+    private ArrayList<UserLocation> mUserLocations = new ArrayList<>();
 
 
     @Override
@@ -67,6 +76,8 @@ public class ChatroomActivity extends AppCompatActivity implements
         mChatMessageRecyclerView = findViewById(R.id.chatmessage_recycler_view);
 
         findViewById(R.id.checkmark).setOnClickListener(this);
+
+
 
         mDb = FirebaseFirestore.getInstance();
 
@@ -112,8 +123,7 @@ public class ChatroomActivity extends AppCompatActivity implements
                             }
                             mChatMessageRecyclerAdapter.notifyDataSetChanged();
 
-                            Toast toast = Toast.makeText(getApplicationContext(),String.valueOf(abc),Toast.LENGTH_LONG);
-                            toast.show();
+
                         }
                     }
                 });
@@ -125,7 +135,7 @@ public class ChatroomActivity extends AppCompatActivity implements
         CollectionReference usersRef = mDb
                 .collection("ChatRooms")
                 .document(mChatroom.getChatroom_id())
-                .collection("User list");
+                .collection("User List");
 
         mUserListEventListener = usersRef
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
@@ -140,17 +150,36 @@ public class ChatroomActivity extends AppCompatActivity implements
 
                             // Clear the list and add all the users again
                             mUserList.clear();
-                            mUserList = new ArrayList<>();
 
                             for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                                 User user = doc.toObject(User.class);
                                 mUserList.add(user);
+                                getUserLocation(user);
                             }
 
-                            Log.d(TAG, "onEvent: user list size: " + mUserList.size());
+
                         }
                     }
                 });
+    }
+
+    private void getUserLocation(User user) {
+        DocumentReference locationsRef = mDb
+                .collection("User Locations")
+                .document(user.getUser_id());
+
+        locationsRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+
+                if(task.isSuccessful()){
+                    if(task.getResult().toObject(UserLocation.class) != null){
+                        UserLocation userLocation=task.getResult().toObject(UserLocation.class);
+                        mUserLocations.add(userLocation);
+                    }
+                }
+            }
+        });
     }
 
     private void initChatroomRecyclerView(){
@@ -225,10 +254,11 @@ public class ChatroomActivity extends AppCompatActivity implements
         UserListFragment fragment = UserListFragment.newInstance();
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("User List", mUserList);
+        bundle.putParcelableArrayList("User Locations",mUserLocations);
         fragment.setArguments(bundle);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        //transaction.setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_up);
+        transaction.setCustomAnimations(R.anim.slide_in_up, R.anim.slide_out_up);
         transaction.replace(R.id.user_list_container, fragment, "User List");
         transaction.addToBackStack("User List");
         transaction.commit();
@@ -279,8 +309,6 @@ public class ChatroomActivity extends AppCompatActivity implements
     @Override
     protected void onResume() {
         super.onResume();
-        Toast toast = Toast.makeText(getApplicationContext(),"message.toString()",Toast.LENGTH_LONG);
-        toast.show();
         getChatMessages();
     }
 
@@ -339,5 +367,6 @@ public class ChatroomActivity extends AppCompatActivity implements
             }
         }
     }
+
 
 }
