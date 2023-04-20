@@ -254,7 +254,6 @@ public class HomeActivity extends AppCompatActivity implements
 
         CollectionReference ChatroomsCollection = mDb
                 .collection("ChatRooms");
-
         mChatroomEventListener = ChatroomsCollection.addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -264,22 +263,49 @@ public class HomeActivity extends AppCompatActivity implements
                     Log.e(TAG, "onEvent: Listen failed.", e);
                     return;
                 }
+                User user = ((UserClient)(getApplicationContext())).getUser();
 
                 if (queryDocumentSnapshots != null) {
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
 
                         ChatRoom chatroom = doc.toObject(ChatRoom.class);
-                        if (!mChatroomIds.contains(chatroom.getChatroom_id())) {
-                            mChatroomIds.add(chatroom.getChatroom_id());
-                            mChatrooms.add(chatroom);
-                        }
+                        ChatroomsCollection.document(chatroom.getChatroom_id()).collection("User List")
+                                .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                    @Override
+                                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                                        Log.d(TAG, "onEvent: called.");
+
+                                        if (e != null) {
+                                            Log.e(TAG, "onEvent: Listen failed.", e);
+                                            return;
+                                        }
+
+                                        if (queryDocumentSnapshots != null) {
+                                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+
+                                                User userInList = doc.toObject(User.class);
+                                                if (userInList.getUser_id().equals(user.getUser_id())) {
+                                                    if (!mChatroomIds.contains(chatroom.getChatroom_id())) {
+                                                        mChatroomIds.add(chatroom.getChatroom_id());
+                                                        mChatrooms.add(chatroom);
+                                                        Toast.makeText(HomeActivity.this, chatroom.getChatroom_id(), Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+                                            }
+                                            mChatroomRecyclerAdapter.notifyDataSetChanged();
+                                        }
+
+                                    }
+                                });
+
                     }
-                    Log.d(TAG, "onEvent: number of Chatrooms: " + mChatrooms.size());
-                    mChatroomRecyclerAdapter.notifyDataSetChanged();
+
                 }
+
 
             }
         });
+
     }
 
     private void buildNewChatroom(String chatroomName) {
