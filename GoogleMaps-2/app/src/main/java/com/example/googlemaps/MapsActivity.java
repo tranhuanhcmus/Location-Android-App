@@ -1133,34 +1133,38 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         findViewById(R.id.walk).setBackgroundColor(Color.WHITE);
         findViewById(R.id.bus).setBackgroundColor(Color.WHITE);
         findViewById(R.id.moto).setBackgroundColor(Color.WHITE);
+        
+        if(viewModeTraffic != null) {
+            
+            if(view.getId() == findViewById(R.id.car).getId()){
+                sendRequestFindPath(originLocation,destLocation,fi.drivingMode);
 
-        if(view.getId() == findViewById(R.id.car).getId()){
-            sendRequestFindPath(originLocation,destLocation,fi.drivingMode);
+                findViewById(R.id.car).setBackgroundColor(Color.parseColor("#66FFFF"));
 
-            findViewById(R.id.car).setBackgroundColor(Color.parseColor("#66FFFF"));
+            }
 
-        }
+            if(view.getId() == findViewById(R.id.moto).getId()){
+                sendRequestFindPath(originLocation,destLocation,fi.motoMode);
 
-        if(view.getId() == findViewById(R.id.moto).getId()){
-            sendRequestFindPath(originLocation,destLocation,fi.motoMode);
+                findViewById(R.id.moto).setBackgroundColor(Color.parseColor("#66FFFF"));
 
-            findViewById(R.id.moto).setBackgroundColor(Color.parseColor("#66FFFF"));
+            }
 
-        }
+            if(view.getId() == findViewById(R.id.bus).getId()){
+                sendRequestFindPath(originLocation,destLocation,fi.transitMode);
 
-        if(view.getId() == findViewById(R.id.bus).getId()){
-            sendRequestFindPath(originLocation,destLocation,fi.transitMode);
+                findViewById(R.id.bus).setBackgroundColor(Color.parseColor("#66FFFF"));
 
-            findViewById(R.id.bus).setBackgroundColor(Color.parseColor("#66FFFF"));
+            }
 
-        }
+            if(view.getId() == findViewById(R.id.walk).getId()){
+                sendRequestFindPath(originLocation,destLocation,fi.walkMode);
 
-        if(view.getId() == findViewById(R.id.walk).getId()){
-            sendRequestFindPath(originLocation,destLocation,fi.walkMode);
+                findViewById(R.id.walk).setBackgroundColor(Color.parseColor("#66FFFF"));
 
-            findViewById(R.id.walk).setBackgroundColor(Color.parseColor("#66FFFF"));
-
-        }
+            }
+    
+       }
     }
 
     public void visibility(View view){
