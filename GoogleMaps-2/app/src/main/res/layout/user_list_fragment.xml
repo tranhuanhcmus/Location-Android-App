@@ -24,6 +24,33 @@
             >
 
         </androidx.recyclerview.widget.RecyclerView>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/custom_grey_border">
+
+            <ImageView
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/add_friends_7"
+                android:id="@+id/addbutton"/>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/input_usernamess"
+                android:background="@null"
+                android:layout_toLeftOf="@+id/addbutton"
+                android:gravity="center_vertical"
+                android:textSize="14sp"
+                android:hint="name of user..."
+                android:textColor="@color/black"
+                android:layout_marginLeft="5dp"/>
+
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -62,6 +89,7 @@
                 android:layout_marginStart="10dp"
                 android:id="@+id/btn_reset_map"/>
         </RelativeLayout>
+
 
 
     </LinearLayout>

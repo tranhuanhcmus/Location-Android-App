@@ -16,6 +16,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -28,10 +30,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.googlemaps.Adapter.UserRecyclerAdapter;
+import com.example.googlemaps.HomeActivity;
+import com.example.googlemaps.LoginActivity;
 import com.example.googlemaps.R;
+import com.example.googlemaps.model.ChatRoom;
 import com.example.googlemaps.model.ClusterMarker;
+import com.example.googlemaps.model.Message;
 import com.example.googlemaps.model.PolylineData;
 import com.example.googlemaps.model.User;
+import com.example.googlemaps.model.UserClient;
 import com.example.googlemaps.model.UserLocation;
 import com.example.googlemaps.utils.MyClusterManagerRenderer;
 import com.example.googlemaps.utils.ViewWeightAnimationWrapper;
@@ -48,10 +55,17 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
@@ -65,7 +79,7 @@ import java.util.List;
 
 import static com.example.googlemaps.Constants.MAPVIEW_BUNDLE_KEY;
 
-public class UserListFragment extends Fragment implements OnMapReadyCallback,View.OnClickListener,
+public class UserListFragment extends Fragment implements OnMapReadyCallback, View.OnClickListener,
         GoogleMap.OnInfoWindowClickListener, GoogleMap.OnPolylineClickListener, UserRecyclerAdapter.UserListRecyclerClickListener {
 
     private static final String TAG = "UserListFragment";
@@ -78,8 +92,15 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     private MapView mMapView;
     private RelativeLayout mMapContainer;
 
+    private EditText username;
+    private ImageView addbutton;
+    private ChatRoom mChatroom;
+
+    private FirebaseFirestore mDb;
+
     //vars
     private ArrayList<User> mUserList = new ArrayList<>();
+    private ArrayList<User> mUserListFull = new ArrayList<>();
     private ArrayList<UserLocation> mUserLocations = new ArrayList<>();
     private UserRecyclerAdapter mUserRecyclerAdapter;
 
@@ -92,14 +113,15 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
     private Marker mSelectedMarker = null;
 
-    private ArrayList<Marker> mTripMarkers=new ArrayList<>();
+    private ArrayList<Marker> mTripMarkers = new ArrayList<>();
 
     private int mMapLayoutState = 0;
 
-    private GeoApiContext mGeoApiContext=null;
+    private GeoApiContext mGeoApiContext = null;
     private ArrayList<PolylineData> mPolyLinesData = new ArrayList<>();
 
     private Handler mHandler = new Handler();
+    String KeyChatRoom;
     private Runnable mRunnable;
 
     public static UserListFragment newInstance() {
@@ -109,10 +131,13 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mDb = FirebaseFirestore.getInstance();
         if (getArguments() != null) {
             mUserList = getArguments().getParcelableArrayList("User List");
             mUserLocations = getArguments().getParcelableArrayList("User Locations");
+            mChatroom = getArguments().getParcelable("mChatroom");
         }
+
 
     }
 
@@ -125,11 +150,13 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         mUserListRecyclerView = view.findViewById(R.id.user_list_recycler_view);
         mMapView = view.findViewById(R.id.user_list_map);
         mMapContainer = view.findViewById(R.id.map_container);
+        view.findViewById(R.id.addbutton).setOnClickListener(this);
+        username = view.findViewById(R.id.input_usernamess);
+
 
         initGoogleMap(savedInstanceState);
 
         initUserListRecyclerView();
-
 
 
         setUserPosition();
@@ -138,7 +165,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     }
 
 
-    private void startUserLocationsRunnable(){
+    private void startUserLocationsRunnable() {
         Log.d(TAG, "startUserLocationsRunnable: starting runnable for retrieving updated locations.");
         mHandler.postDelayed(mRunnable = new Runnable() {
             @Override
@@ -149,14 +176,14 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         }, LOCATION_UPDATE_INTERVAL);
     }
 
-    private void stopLocationUpdates(){
+    private void stopLocationUpdates() {
         mHandler.removeCallbacks(mRunnable);
     }
 
-    private void retrieveUserLocations(){
+    private void retrieveUserLocations() {
 
-        try{
-            for(final ClusterMarker clusterMarker: mClusterMarkers){
+        try {
+            for (final ClusterMarker clusterMarker : mClusterMarkers) {
 
                 DocumentReference userLocationRef = FirebaseFirestore.getInstance()
                         .collection(getString(R.string.collection_user_locations))
@@ -165,7 +192,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                 userLocationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
 
                             final UserLocation updatedUserLocation = task.getResult().toObject(UserLocation.class);
 
@@ -192,8 +219,8 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                     }
                 });
             }
-        }catch (IllegalStateException e){
-            Log.e(TAG, "retrieveUserLocations: Fragment was destroyed during Firestore query. Ending query." + e.getMessage() );
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "retrieveUserLocations: Fragment was destroyed during Firestore query. Ending query." + e.getMessage());
         }
 
     }
@@ -203,20 +230,20 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
         if (mGoogleMap != null) {
 
-                resetMap();
-                mClusterManager = new ClusterManager<ClusterMarker>(getActivity().getApplicationContext(), mGoogleMap);
+            resetMap();
+            mClusterManager = new ClusterManager<ClusterMarker>(getActivity().getApplicationContext(), mGoogleMap);
 
 
-                mClusterManagerRenderer = new MyClusterManagerRenderer(
-                        getActivity(),
-                        mGoogleMap,
-                        mClusterManager
-                );
+            mClusterManagerRenderer = new MyClusterManagerRenderer(
+                    getActivity(),
+                    mGoogleMap,
+                    mClusterManager
+            );
 
-                mGoogleMap.setOnCameraIdleListener(mClusterManager);
-                mGoogleMap.setOnMarkerClickListener(mClusterManager);
-                mGoogleMap.setOnInfoWindowClickListener(this);
-                mClusterManager.setRenderer(mClusterManagerRenderer);
+            mGoogleMap.setOnCameraIdleListener(mClusterManager);
+            mGoogleMap.setOnMarkerClickListener(mClusterManager);
+            mGoogleMap.setOnInfoWindowClickListener(this);
+            mClusterManager.setRenderer(mClusterManagerRenderer);
 
 
             for (UserLocation userLocation : mUserLocations) {
@@ -243,14 +270,13 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                             avatar,
                             userLocation.getUser()
                     );
-                    Log.d(TAG,"Cluster Marker:"+newClusterMarker.toString());
+                    Log.d(TAG, "Cluster Marker:" + newClusterMarker.toString());
                     mClusterManager.addItem(newClusterMarker);
                     mClusterMarkers.add(newClusterMarker);
 
                 } catch (NullPointerException e) {
                     Log.e(TAG, "addMapMarkers: NullPointerException: " + e.getMessage());
                 }
-
 
 
             }
@@ -261,10 +287,10 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     }
 
     private void resetMap() {
-        if(mGoogleMap != null) {
+        if (mGoogleMap != null) {
             mGoogleMap.clear();
 
-            if(mClusterManager != null){
+            if (mClusterManager != null) {
                 mClusterManager.clearItems();
             }
 
@@ -273,12 +299,76 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                 mClusterMarkers = new ArrayList<>();
             }
 
-            if(mPolyLinesData.size() > 0){
+            if (mPolyLinesData.size() > 0) {
                 mPolyLinesData.clear();
                 mPolyLinesData = new ArrayList<>();
             }
         }
     }
+
+    private void joinRoom() {
+
+
+        String usernames = username.getText().toString();
+        CollectionReference usersRef = mDb
+                .collection("Users");
+
+        usersRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                    @Override
+                    public void onEvent(@javax.annotation.Nullable QuerySnapshot queryDocumentSnapshots, @javax.annotation.Nullable FirebaseFirestoreException e) {
+                        if (e != null) {
+                            Log.e(TAG, "onEvent: Listen failed.", e);
+                            return;
+                        }
+
+                        if(queryDocumentSnapshots != null){
+
+                            // Clear the list and add all the users again
+                            mUserListFull.clear();
+
+                            for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                                User user = doc.toObject(User.class);
+                                mUserListFull.add(user);
+                            }
+
+
+                        }
+                    }
+                });
+
+        if(!usernames.equals("")){
+
+
+           //
+            DocumentReference joinChatroomRef = mDb
+                    .collection("ChatRooms")
+                    .document(mChatroom.getChatroom_id())
+                    .collection("User List").document();
+
+            for(int i= 0;i<mUserList.size();i++){
+                if(mUserList.get(i).getUsername().equals(usernames)){
+                    return;
+                }
+            }
+
+            for(int i= 0;i<mUserListFull.size();i++) {
+                if (mUserListFull.get(i).getUsername().equals(usernames)) {
+                    joinChatroomRef.set(mUserListFull.get(i)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if (task.isSuccessful()) {
+                                username.setText("");
+                            }
+                        }
+                    });
+                    return;
+                }
+            }
+
+        }
+
+    }
+
 
     private void initGoogleMap(Bundle savedInstanceState) {
 
@@ -290,7 +380,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         mMapView.onCreate(mapViewBundle);
 
         mMapView.getMapAsync(this);
-        if(mGeoApiContext == null){
+        if (mGeoApiContext == null) {
             mGeoApiContext = new GeoApiContext.Builder()
                     .apiKey(getString(R.string.API_KEY))
                     .build();
@@ -298,7 +388,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     }
 
     private void initUserListRecyclerView() {
-        mUserRecyclerAdapter = new UserRecyclerAdapter(mUserList,this);
+        mUserRecyclerAdapter = new UserRecyclerAdapter(mUserList, this);
         mUserListRecyclerView.setAdapter(mUserRecyclerAdapter);
         mUserListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -401,7 +491,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         mMapView.onLowMemory();
     }
 
-    private void expandMapAnimation(){
+    private void expandMapAnimation() {
         ViewWeightAnimationWrapper mapAnimationWrapper = new ViewWeightAnimationWrapper(mMapContainer);
         ObjectAnimator mapAnimation = ObjectAnimator.ofFloat(mapAnimationWrapper,
                 "weight",
@@ -420,7 +510,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         mapAnimation.start();
     }
 
-    private void contractMapAnimation(){
+    private void contractMapAnimation() {
         ViewWeightAnimationWrapper mapAnimationWrapper = new ViewWeightAnimationWrapper(mMapContainer);
         ObjectAnimator mapAnimation = ObjectAnimator.ofFloat(mapAnimationWrapper,
                 "weight",
@@ -442,22 +532,24 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     @Override
     public void onClick(View v) {
         Log.d(TAG, "onClick: ");
-        switch (v.getId()){
-            case R.id.btn_full_screen_map:{
-                if(mMapLayoutState == MAP_LAYOUT_STATE_CONTRACTED){
+        switch (v.getId()) {
+            case R.id.btn_full_screen_map: {
+                if (mMapLayoutState == MAP_LAYOUT_STATE_CONTRACTED) {
                     mMapLayoutState = MAP_LAYOUT_STATE_EXPANDED;
                     expandMapAnimation();
-                }
-                else if(mMapLayoutState == MAP_LAYOUT_STATE_EXPANDED){
+                } else if (mMapLayoutState == MAP_LAYOUT_STATE_EXPANDED) {
                     mMapLayoutState = MAP_LAYOUT_STATE_CONTRACTED;
                     contractMapAnimation();
                 }
                 break;
             }
-            case R.id.btn_reset_map:{
+            case R.id.btn_reset_map: {
                 addMapMarkers();
                 startUserLocationsRunnable();
                 break;
+            }
+            case R.id.addbutton: {
+                joinRoom();
             }
             default:
                 return;
@@ -467,7 +559,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
     @Override
     public void onInfoWindowClick(final Marker marker) {
-        if(marker.getTitle().contains("Trip #")){
+        if (marker.getTitle().contains("Trip #")) {
             final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage("Open Google Maps?")
                     .setCancelable(true)
@@ -479,12 +571,12 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                             Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
                             mapIntent.setPackage("com.google.android.apps.maps");
 
-                            try{
+                            try {
                                 if (mapIntent.resolveActivity(getActivity().getPackageManager()) != null) {
                                     startActivity(mapIntent);
                                 }
-                            }catch (NullPointerException e){
-                                Log.e(TAG, "onClick: NullPointerException: Couldn't open map." + e.getMessage() );
+                            } catch (NullPointerException e) {
+                                Log.e(TAG, "onClick: NullPointerException: Couldn't open map." + e.getMessage());
                                 Toast.makeText(getActivity(), "Couldn't open map", Toast.LENGTH_SHORT).show();
                             }
 
@@ -497,12 +589,10 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                     });
             final AlertDialog alert = builder.create();
             alert.show();
-        }
-        else{
-            if(marker.getSnippet().equals("This is you")){
+        } else {
+            if (marker.getSnippet().equals("This is you")) {
                 marker.hideInfoWindow();
-            }
-            else{
+            } else {
 
                 final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(marker.getSnippet())
@@ -526,7 +616,8 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         }
 
     }
-    private void calculateDirections(Marker marker){
+
+    private void calculateDirections(Marker marker) {
         Log.d(TAG, "calculateDirections: calculating directions.");
 
         com.google.maps.model.LatLng destination = new com.google.maps.model.LatLng(
@@ -552,31 +643,32 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
             @Override
             public void onFailure(Throwable e) {
-                Log.e(TAG, "onFailure: " + e.getMessage() );
+                Log.e(TAG, "onFailure: " + e.getMessage());
             }
         });
     }
-    private void removeTripMarkers(){
-        for(Marker marker:mTripMarkers){
+
+    private void removeTripMarkers() {
+        for (Marker marker : mTripMarkers) {
             marker.remove();
         }
     }
 
-    private void resetSelectedMarker(){
-        if(mSelectedMarker!=null){
+    private void resetSelectedMarker() {
+        if (mSelectedMarker != null) {
             mSelectedMarker.setVisible(true);
-            mSelectedMarker=null;
+            mSelectedMarker = null;
             removeTripMarkers();
         }
     }
 
-    private void addPolylinesToMap(final DirectionsResult result){
+    private void addPolylinesToMap(final DirectionsResult result) {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
             @Override
             public void run() {
                 Log.d(TAG, "run: result routes: " + result.routes.length);
-                if(mPolyLinesData.size() > 0){
-                    for(PolylineData polylineData: mPolyLinesData){
+                if (mPolyLinesData.size() > 0) {
+                    for (PolylineData polylineData : mPolyLinesData) {
                         polylineData.getPolyline().remove();
                     }
                     mPolyLinesData.clear();
@@ -584,14 +676,14 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
                 }
 
                 double duration = 999999999;
-                for(DirectionsRoute route: result.routes){
+                for (DirectionsRoute route : result.routes) {
                     Log.d(TAG, "run: leg: " + route.legs[0].toString());
                     List<com.google.maps.model.LatLng> decodedPath = PolylineEncoding.decode(route.overviewPolyline.getEncodedPath());
 
                     List<LatLng> newDecodedPath = new ArrayList<>();
 
                     // This loops through all the LatLng coordinates of ONE polyline.
-                    for(com.google.maps.model.LatLng latLng: decodedPath){
+                    for (com.google.maps.model.LatLng latLng : decodedPath) {
 
 //                        Log.d(TAG, "run: latlng: " + latLng.toString());
 
@@ -607,7 +699,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
                     // highlight the fastest route and adjust camera
                     double tempDuration = route.legs[0].duration.inSeconds;
-                    if(tempDuration < duration){
+                    if (tempDuration < duration) {
                         duration = tempDuration;
                         onPolylineClick(polyline);
                         zoomRoute(polyline.getPoints());
@@ -641,10 +733,10 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
     public void onPolylineClick(Polyline polyline) {
 
         int index = 0;
-        for(PolylineData polylineData: mPolyLinesData){
+        for (PolylineData polylineData : mPolyLinesData) {
             index++;
             Log.d(TAG, "onPolylineClick: toString: " + polylineData.toString());
-            if(polyline.getId().equals(polylineData.getPolyline().getId())){
+            if (polyline.getId().equals(polylineData.getPolyline().getId())) {
                 polylineData.getPolyline().setColor(ContextCompat.getColor(getActivity(), R.color.blue1));
                 polylineData.getPolyline().setZIndex(1);
 
@@ -662,8 +754,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
 
                 marker.showInfoWindow();
                 mTripMarkers.add(marker);
-            }
-            else{
+            } else {
                 polylineData.getPolyline().setColor(ContextCompat.getColor(getActivity(), R.color.darkGrey));
                 polylineData.getPolyline().setZIndex(0);
             }
@@ -675,8 +766,8 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
         Log.d(TAG, "onUserClicked: selected a user: " + mUserList.get(position).toString());
         String selectedUserId = mUserList.get(position).getUser_id();
 
-        for(ClusterMarker clusterMarker: mClusterMarkers){
-            if(selectedUserId.equals(clusterMarker.getUser().getUser_id())){
+        for (ClusterMarker clusterMarker : mClusterMarkers) {
+            if (selectedUserId.equals(clusterMarker.getUser().getUser_id())) {
                 mGoogleMap.animateCamera(
                         CameraUpdateFactory.newLatLng(
                                 new LatLng(clusterMarker.getPosition().latitude, clusterMarker.getPosition().longitude)),
@@ -687,6 +778,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback,Vie
             }
         }
     }
+
 }
 
 

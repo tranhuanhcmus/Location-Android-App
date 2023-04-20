@@ -256,6 +256,7 @@ public class ChatroomActivity extends AppCompatActivity implements
         Bundle bundle = new Bundle();
         bundle.putParcelableArrayList("User List", mUserList);
         bundle.putParcelableArrayList("User Locations",mUserLocations);
+        bundle.putParcelable("mChatroom",mChatroom);
         fragment.setArguments(bundle);
 
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
