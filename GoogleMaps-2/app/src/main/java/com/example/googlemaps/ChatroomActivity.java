@@ -39,6 +39,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 public class ChatroomActivity extends AppCompatActivity implements
         View.OnClickListener
@@ -222,6 +223,11 @@ public class ChatroomActivity extends AppCompatActivity implements
 
     private void inflateUserListFragment(){
         hideSoftKeyboard();
+        try {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
 
         UserListFragment fragment = UserListFragment.newInstance();
         Bundle bundle = new Bundle();
