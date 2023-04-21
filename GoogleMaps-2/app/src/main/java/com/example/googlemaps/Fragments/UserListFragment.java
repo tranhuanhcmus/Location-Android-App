@@ -340,10 +340,6 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback, Vi
 
 
            //
-            DocumentReference joinChatroomRef = mDb
-                    .collection("ChatRooms")
-                    .document(mChatroom.getChatroom_id())
-                    .collection("User List").document();
 
             for(int i= 0;i<mUserList.size();i++){
                 if(mUserList.get(i).getUsername().equals(usernames)){
@@ -353,6 +349,11 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback, Vi
 
             for(int i= 0;i<mUserListFull.size();i++) {
                 if (mUserListFull.get(i).getUsername().equals(usernames)) {
+                    DocumentReference joinChatroomRef = mDb
+                            .collection("ChatRooms")
+                            .document(mChatroom.getChatroom_id())
+                            .collection("User List").document(mUserListFull.get(i).getUser_id());
+
                     joinChatroomRef.set(mUserListFull.get(i)).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
