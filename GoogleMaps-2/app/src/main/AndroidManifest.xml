@@ -6,9 +6,12 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
+        android:name=".model.UserClient"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -16,9 +19,42 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.GoogleMaps"
-        android:name=".model.UserClient"
         tools:targetApi="31">
-        <activity android:name=".MapsActivity" />
+        <activity
+            android:name=".BookMark.BookMarkActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PlaceLabeling.setNameLabel"
+            android:exported="false"></activity>
+        <activity
+            android:name=".ChooseLocationOnMap"
+            android:exported="false" />
+        <activity
+            android:name=".PlaceLabeling.addLabel"
+            android:exported="false" />
+        <activity android:name=".PlaceLabeling.LabelingActivity" />
+        <activity
+            android:name=".MapsActivity"
+            android:exported="true">
+
+            <!--
+                        Khai báo intent filter để người dùng click vào đoạn vị trí chia sẻ
+                        thì sẽ mở ứng dụng
+            -->
+            <tools:validation testUrl="http://www.my_google_maps.com/location" />
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.my_google_maps.com"
+                    android:pathPrefix="/location"
+                    android:scheme="http" />
+            </intent-filter>
+        </activity>
         <activity android:name=".ChatroomActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".HomeActivity" />
@@ -45,8 +81,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".services.LocationService"
-            android:stopWithTask="true"/>
+
+        <service
+            android:name=".services.LocationService"
+            android:stopWithTask="true" />
     </application>
 
 </manifest>
