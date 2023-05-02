@@ -5,6 +5,9 @@ import android.view.View;
 import com.example.googlemaps.Direction.Distance;
 import com.example.googlemaps.Direction.Duration;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
+
+import java.util.List;
 
 public class infoPlace {
 
@@ -17,6 +20,8 @@ public class infoPlace {
     public Distance distance;
 
     public Duration duration;
+
+    public List<PhotoMetadata> metadataList;
 
     public infoPlace(String name, String address, String rating, LatLng position){
         this.name = name;

@@ -3,6 +3,7 @@ package com.example.googlemaps.Direction;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 
@@ -107,6 +108,8 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
 
             routes.add(route);
             Log.e(TAG, "parseJSon: " + routes.get(0).polyline );
+            Log.e(TAG, "parseJSon: " + start_address );
+            Log.e(TAG, "parseJSon: " + end_address );
 
 
         }

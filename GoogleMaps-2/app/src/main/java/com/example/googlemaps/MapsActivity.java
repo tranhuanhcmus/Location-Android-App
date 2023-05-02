@@ -1,5 +1,8 @@
 package com.example.googlemaps;
 
+
+import static android.app.PendingIntent.getActivity;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -14,10 +17,12 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -41,9 +46,13 @@ import androidx.core.content.ContextCompat;
 
 
 import com.example.googlemaps.Adapter.AutoCompleteAdapter;
+import com.example.googlemaps.BookMark.BookMarkActivity;
+import com.example.googlemaps.BookMark.WorkWithSQLiteBookMark;
 import com.example.googlemaps.Fragments.UserListFragment;
 
 import androidx.fragment.app.FragmentTransaction;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.googlemaps.Adapter.AutoCompleteAdapter;
 import com.example.googlemaps.Adapter.HistoryAdapter;
@@ -54,6 +63,11 @@ import com.example.googlemaps.InfoPlace.FragmentInfo;
 import com.example.googlemaps.InfoPlace.MainCallbacks;
 import com.example.googlemaps.InfoPlace.infoPlace;
 
+import com.example.googlemaps.PlaceLabeling.LabelingActivity;
+import com.example.googlemaps.PlaceLabeling.ListLabelAdapterForMap;
+import com.example.googlemaps.PlaceLabeling.ListLabelAdapter;
+import com.example.googlemaps.PlaceLabeling.ListLabelAdapterForMap;
+import com.example.googlemaps.PlaceLabeling.WorkWithSQLiteLabel;
 import com.example.googlemaps.databinding.ActivityMapsBinding;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -81,6 +95,8 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -92,6 +108,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COARSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int REQUEST_CODE_LOCATION = 1234;
+
+    private List<Intent> intentList;
 
     private FusedLocationProviderClient fusedLocationProviderClient;
 
@@ -116,9 +134,18 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static LatLng destLocation = null;
 
     //widgets
-    private static AutoCompleteTextView textSearch;
+    public static AutoCompleteTextView textSearch;
     public static AutoCompleteTextView textSearchOrigin;
     public static AutoCompleteTextView textSearchDest;
+
+    private static ImageView imgSearch;
+    private static ImageView imgBackSearch;
+
+    private static ImageView imgSearchOrigin;
+    private static ImageView imgBackSearchOrigin;
+
+    private static ImageView imgSearchDest;
+    private static ImageView imgBackSearchDest;
 
     private static ImageView micro;
     private static ImageView clearText;
@@ -127,6 +154,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static ImageView micro2;
     private static ImageView clearText2;
     public static ListView listViewSearch;
+    public static RecyclerView listViewLabel;
     public static LinearLayout history;
     public static ImageView visibility;
     private static ImageView visibility_off;
@@ -137,6 +165,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static TextView timeBus;
     public static TextView timeWalk;
     private static ImageView imgGps;
+
+    private ImageView imgBookMark;
 
 
     public static SQLiteDatabase db;
@@ -149,6 +179,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public static LinearLayout linearLayout2;
 
     public View viewModeTraffic;
+
+    public String trafficMode;
     com.example.googlemaps.InfoPlace.infoPlace infoPlace;
 
 
@@ -159,6 +191,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     //token
 
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -166,11 +200,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Places.initialize(getApplicationContext(),getString(R.string.API_KEY));
         }
 
+        setTitle("Map view");
+
         // tạo hoặc mở database
         db = this.openOrCreateDatabase("myDB",MODE_PRIVATE,null);
 
         //db.execSQL(" DROP TABLE IF EXISTS LichSu;");
 
+        //Tạo bảng lịch sử nếu chưa tồn tại
         if(!checkIfTableExists(db, "LichSu")){
             db.execSQL("create table LichSu ("
                                     +"id integer PRIMARY KEY autoincrement,"
@@ -178,6 +215,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     +"address text);"
             );
         }
+
+        // tạo bảng Nhãn nếu chưa tồn tại
+        WorkWithSQLiteLabel workWithSQLiteLabel = new WorkWithSQLiteLabel(db, "Nhan");
+        workWithSQLiteLabel.createTblLabel();
+
+        // tạo bảng Lưu nếu chưa tồn tại
+        WorkWithSQLiteBookMark workWithSQLiteBookMark = new WorkWithSQLiteBookMark(db,"Luu");
+        workWithSQLiteBookMark.createTable();
+
 
         placesClient = Places.createClient(this);
 
@@ -188,6 +234,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapFragment.getMapAsync(this);
 
 
+        imgSearch = findViewById(R.id.iconSearch);
+        imgBackSearch = findViewById(R.id.iconBackSearch);
+        imgBackSearch.setVisibility(View.GONE);
+
+        imgSearchOrigin = findViewById(R.id.iconSearchOrigin);
+        imgBackSearchOrigin = findViewById(R.id.iconBackSearchOrigin);
+        imgBackSearchOrigin.setVisibility(View.GONE);
+
+        imgSearchDest = findViewById(R.id.iconSearchDest);
+        imgBackSearchDest = findViewById(R.id.iconBackSearchDest);
+        imgBackSearchDest.setVisibility(View.GONE);
 
         // autoComplete code
         textSearch = findViewById(R.id.textSearch);
@@ -209,12 +266,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         listViewSearch = findViewById(R.id.listViewSearch);
         listViewSearch.setVisibility(View.GONE);
 
+        listViewLabel = findViewById(R.id.listViewLabel);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        listViewLabel.setLayoutManager(linearLayoutManager);
+        listViewLabel.setVisibility(View.INVISIBLE);
+
         history = findViewById(R.id.history);
         history.setVisibility(View.GONE);
 
-        visibility = findViewById(R.id.visibility);
-        visibility_off = findViewById(R.id.visibility_off);
-        visibility_off.setVisibility(View.GONE);
+
+
 
 
         linearLayout1 = findViewById(R.id.relative1);
@@ -266,6 +327,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onFocusChange(View view, boolean hasFocus) {
 
                 showHistory(textSearch,hasFocus);
+                convertSearchAndBackSearch(textSearch,hasFocus);
 
             }
 
@@ -313,6 +375,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onFocusChange(View view, boolean hasFocus) {
 
                 showHistory(textSearchOrigin,hasFocus);
+                convertSearchAndBackSearch(textSearchOrigin,hasFocus);
 
             }
         });
@@ -354,12 +417,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onFocusChange(View view, boolean hasFocus) {
 
                 showHistory(textSearchDest,hasFocus);
+                convertSearchAndBackSearch(textSearchDest,hasFocus);
 
             }
         });
 
         // Thiết lập
         imgGps = findViewById(R.id.gps);
+        imgBookMark = findViewById(R.id.favourite);
 
         getPermissionFromUser();
 
@@ -372,16 +437,88 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         frameLayout = findViewById(R.id.fragmentInfo);
         frameLayout.setVisibility(View.GONE);
 
+
+
+    }
+
+
+
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        // cập nhật dữ liệu cho label
+        List<InfoSearching> listLabel = new ArrayList<>();
+        if(checkIfTableExists(db,"Nhan")){
+            Cursor cursor = db.rawQuery("SELECT * FROM Nhan", null);
+            if(cursor.moveToFirst()){
+                do{
+                    @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex("name"));
+                    @SuppressLint("Range") String address = cursor.getString(cursor.getColumnIndex("address"));
+                    InfoSearching is = new InfoSearching(name,address,0);
+                    listLabel.add(is);
+
+                }while (cursor.moveToNext());
+            }
+            listLabel.add(new InfoSearching("Khác","Xem thêm",0));
+        }
+        ListLabelAdapterForMap lla = new ListLabelAdapterForMap(this,listLabel);
+        listViewLabel.setAdapter(lla);
+    }
+
+    public void convertSearchAndBackSearch(AutoCompleteTextView view, boolean isFocus){
+        if(view.getId() == textSearch.getId()){
+            if(isFocus){
+                imgSearch.setVisibility(View.GONE);
+                imgBackSearch.setVisibility(View.VISIBLE);
+            }else{
+                imgSearch.setVisibility(View.VISIBLE);
+                imgBackSearch.setVisibility(View.GONE);
+            }
+        }else if(view.getId() == textSearchOrigin.getId()){
+            if(isFocus){
+                imgSearchOrigin.setVisibility(View.GONE);
+                imgBackSearchOrigin.setVisibility(View.VISIBLE);
+            }else{
+                imgSearchOrigin.setVisibility(View.VISIBLE);
+                imgBackSearchOrigin.setVisibility(View.GONE);
+            }
+        }else{
+            if(isFocus){
+                imgSearchDest.setVisibility(View.GONE);
+                imgBackSearchDest.setVisibility(View.VISIBLE);
+            }else{
+                imgSearchDest.setVisibility(View.VISIBLE);
+                imgBackSearchDest.setVisibility(View.GONE);
+            }
+        }
+
     }
 
     public void showHistory(AutoCompleteTextView textView,boolean hasFocus){
         if(hasFocus){
 
-            List<InfoSearching> list = new ArrayList<>();
-//                    InfoSearching is = new InfoSearching("Chợ Đại Phước", "Chợ Đại Phước, ấp Phước lý, xã Đại Phước, Nhơn Trạch, Đồng Nai",1000);
-//                    list.add(is);
-//                    list.add(is);
+            // phần lấy dữ liệu của nhãn từ sqlite, set adapter cho nó
+            List<InfoSearching> listLabel = new ArrayList<>();
+            if(checkIfTableExists(db,"Nhan")){
+                Cursor cursor = db.rawQuery("SELECT * FROM Nhan", null);
+                if(cursor.moveToFirst()){
+                    do{
+                        @SuppressLint("Range") String name = cursor.getString(cursor.getColumnIndex("name"));
+                        @SuppressLint("Range") String address = cursor.getString(cursor.getColumnIndex("address"));
+                        InfoSearching is = new InfoSearching(name,address,0);
+                        listLabel.add(is);
 
+                    }while (cursor.moveToNext());
+                }
+            }
+            ListLabelAdapterForMap lla = new ListLabelAdapterForMap(this,listLabel);
+            listViewLabel.setAdapter(lla);
+            listViewLabel.setVisibility(View.VISIBLE);
+
+
+            // phần lấy dữ liệu của Lịch sử từ sqlite, set adapter cho nó
+            List<InfoSearching> list = new ArrayList<>();
             int i = 0;
             if(checkIfTableExists(db,"LichSu")){
                 Cursor cursor = db.rawQuery("SELECT * FROM LichSu", null);
@@ -395,6 +532,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         i++;
                     }while (cursor.moveToNext());
                 }
+                listLabel.add(new InfoSearching("Khác","Xem thêm",0));
             }
 
 
@@ -402,6 +540,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             listViewSearch.setAdapter(aa);
             listViewSearch.setVisibility(View.VISIBLE);
 
+            history.setVisibility(View.VISIBLE);
+
+            // phần ẩn và hiện micro
             if(textView.getId() == textSearch.getId()){
                 micro.setVisibility(View.GONE);
                 clearText.setVisibility(View.VISIBLE);
@@ -414,11 +555,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
 
-
-            history.setVisibility(View.VISIBLE);
-
-            visibility.setVisibility(View.VISIBLE);
-            visibility_off.setVisibility(View.GONE);
 
             listViewSearch.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -450,6 +586,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             });
 
         }else{
+            listViewLabel.setVisibility(View.INVISIBLE);
             listViewSearch.setVisibility(View.GONE);
             history.setVisibility(View.GONE);
 
@@ -474,8 +611,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         db.execSQL("UPDATE LichSu SET id = id - 1 WHERE id > 1");
     }
 
-    private void addRowHistory(String query, InfoSearching is){
-//        String query = "insert into LichSu(name, address) values (?,?)";
+    private void addRowHistory(InfoSearching is){
+        String query = "insert into LichSu(name, address) values (?,?)";
         db.execSQL(query, new Object[]{is.getName(), is.getAddress()});
 
         if(countRowHistory() > 10){
@@ -551,6 +688,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
 
 
+
+
         LatLng HoChiMinhLocation = new LatLng(10.823099, 106.629662);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HoChiMinhLocation,15f),2000,null);
 
@@ -585,11 +724,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         placesClient.fetchPlace(request2).addOnSuccessListener((response2) -> {
                             Place place = response2.getPlace();
                             Log.e(TAG, "Place found: " + place.getName());
-                            Log.e(TAG, "Address: " + place.getAddress());
+                            Log.e(TAG, "Address: " + response.getAutocompletePredictions().get(0).getFullText(null).toString());
                             Log.e(TAG, "LatLng: " + place.getLatLng());
                             Log.e(TAG, "Rating: " + place.getRating());
 
-                            infoPlace = new infoPlace(place.getName(),place.getAddress(), String.valueOf(place.getRating()),place.getLatLng());
+                            // gửi infoPlace qua cho fragment khi click vào marker
+                            infoPlace = new infoPlace(place.getName(),response.getAutocompletePredictions().get(0).getFullText(null).toString(),
+                                    String.valueOf(place.getRating()),place.getLatLng());
                             fi.onMsgFromMainToFrag(infoPlace);
                             frameLayout.setVisibility(View.VISIBLE);
 
@@ -597,8 +738,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             if (photoMetadataList != null && photoMetadataList.size() > 0) {
                                 PhotoMetadata photoMetadata = photoMetadataList.get(0);
                                 String photoUrl = photoMetadata.getAttributions();
+
                                 Log.e(TAG, "Photo URL: " + photoUrl);
                             }
+
+
                         }).addOnFailureListener((exception) -> {
                             if (exception instanceof ApiException) {
                                 ApiException apiException = (ApiException) exception;
@@ -633,9 +777,44 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Search(textSearchDest,"dest");
         }
 
+////////////////////////////////////////////////////////////////////////////////
+        // ATTENTION: This was auto-generated to handle app links.
+        // khi người dùng click vào đường link chia sẻ, mở ứng dụng vào thẳng activity map
+        // sau đó activity sẽ tìm xem có uri được gửi hay không, nếu có thì thực hiện hiển thị
+        // địa chỉ được chia sẻ
 
+        Uri uri = getIntent().getData();
+        if(uri != null){
+            Toast.makeText(this, "TestLink", Toast.LENGTH_SHORT).show();
+            String query = uri.getQuery();
+            String param[] = query.split("=");
+
+            try {
+                String decodeAddress = URLDecoder.decode(param[1],"UTF-8");
+                decodeAddress.replace("%2B","+");
+                textSearch.setText(decodeAddress);
+                geoLocate(textSearch,"dest");
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
+            }
+
+        }
+
+
+        ////////////////////////////////////////////////////
+        // Xem địa chỉ từ bookmark
+        // BookMark gửi intent chứa địa chỉ qua map activity, nếu tìm thấy trong
+        // intent có key = "fromBookMark" thì hiển thị địa điểm đó ra
+        Bundle bundle = getIntent().getExtras();
+
+        if(bundle != null && bundle.containsKey("fromBookMark")){
+            textSearch.setText(bundle.getString("fromBookMark"));
+            geoLocate(textSearch,"dest");
+        }
 
     }
+
+
 
     public void initMap() {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -667,7 +846,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-    public void getDeviceLocation() {
+    public synchronized void getDeviceLocation() {
         // để lấy vị trí hiện tại
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Log.e("getDeviceLocation","getMyLocation");
@@ -678,24 +857,35 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
+                int i = 0;
 
-                Task getLocation = fusedLocationProviderClient.getLastLocation();
-                getLocation.addOnCompleteListener(new OnCompleteListener() {
-                    @Override
-                    public void onComplete(@NonNull Task task) {
-                        if(task.isSuccessful()){
-                            Location location = (Location)getLocation.getResult();
-                            if(location == null){
-                                myLocation = null;
-                                return;
+                do {
+                    Log.e("loop", "getDeviceLocation: " + String.valueOf(i) );
+                    i++;
+                    Task getLocation = fusedLocationProviderClient.getLastLocation();
+                    getLocation.addOnCompleteListener(new OnCompleteListener() {
+                        @Override
+                        public void onComplete(@NonNull Task task) {
+                            if (task.isSuccessful()) {
+                                Location location = (Location) getLocation.getResult();
+                                if (location == null) {
+                                    myLocation = null;
+                                    Log.e("loop", "getDeviceLocation: null");
+                                    return;
+
+                                }
+
+                                // Add a marker in myLocation and move the camera
+                                myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f), 2000, null);
+                                Log.e("loop", "getDeviceLocation: not null " + String.valueOf(myLocation.latitude));
+
                             }
-                            // Add a marker in myLocation and move the camera
-                            myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation,15f),2000,null);
-
                         }
-                    }
-                });
+                    });
+
+
+                }while(myLocation.equals(null));
             }else{
                 getPermissionFromUser();
             }
@@ -781,9 +971,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 textView.setAdapter(aa);
                 aa.notifyDataSetChanged();
 
-                //aa.addAllItems(infoSearchings);
-
-                //Toast.makeText(this, infoSearchings.get(0).getAddress(), Toast.LENGTH_SHORT).show();
             }else{
                 for (int i = 0; i < autocompletePredictions.size(); i++) {
                     InfoSearching infoSearching = new InfoSearching(autocompletePredictions.get(i).getPrimaryText(null).toString(),
@@ -794,8 +981,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 AutoCompleteAdapter aa = new AutoCompleteAdapter(MapsActivity.this,infoSearchings);
                 textView.setAdapter(aa);
                 aa.notifyDataSetChanged();
-
-                //aa.addAllItems(infoSearchings);
 
             }
 
@@ -813,8 +998,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         geoLocate(textSearch, "dest");
     }
 
+    public void callBackSearch(View view){
+        if(textSearch.isFocused()){
+            textSearch.clearFocus();
+            invisibleKeyBoard(view);
+        }else if(textSearchOrigin.isFocused()){
+            textSearchOrigin.clearFocus();
+            invisibleKeyBoard(view);
+        }else{
+            textSearchDest.clearFocus();
+            invisibleKeyBoard(view);
+        }
+    }
 
-    private void geoLocate(AutoCompleteTextView textView, String typeLocation){
+    public void geoLocate(AutoCompleteTextView textView, String typeLocation){
 
 
         String searchString = textView.getText().toString();
@@ -855,8 +1052,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         String[] whereArgs = new String[]{is.getName()};
                         db.delete("LichSu","name=?",whereArgs);
 
-                        String query = "insert into LichSu(name, address) values (?,?)";
-                        addRowHistory(query,is);
+
+                        addRowHistory(is);
 //                        db.execSQL(query, new Object[]{is.getName(), is.getAddress()});
                     }
                 }).addOnFailureListener((exception) -> {
@@ -870,6 +1067,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // kiểu tra xem markersearch tồn tại hay chưa
                     // nếu chưa tổn tại marker thì thêm marker mới vào
+
                     if(!isMarkerSearchCheckOrigin){
                         markerSearchOrigin = mMap.addMarker(new MarkerOptions().position(destination).title(searchString));
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destination,15f),2000,null);
@@ -880,6 +1078,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         markerSearchOrigin.setTitle(searchString);
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destination,15f),2000,null);
                     }
+
+                    sendRequestFindPath(originLocation,destLocation,trafficMode);
                 }else{
 
 
@@ -897,6 +1097,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         markerSearchDest.setTitle(searchString);
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destination,15f),2000,null);
                     }
+
+                    if(textView.getId() == textSearchDest.getId()){
+                        sendRequestFindPath(originLocation,destLocation,trafficMode);
+                    }
+
+
                 }
 
                 Log.d("geoLocate", "geoLocate: found a location: " + address.toString());
@@ -918,34 +1124,57 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if(typeLocation.equals("origin")){
                 originLocation = myLocation;
 
+                if(textSearchOrigin.getText().toString().equals("")){
+                    originLocation = myLocation;
+                    if(isMarkerSearchCheckOrigin){
+                        markerSearchOrigin.remove();
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(originLocation,15f),2000,null);
+                    }
+                }else{
+                    if(!isMarkerSearchCheckOrigin){
+                        markerSearchOrigin = mMap.addMarker(new MarkerOptions().position(originLocation).title(searchString));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(originLocation,15f),2000,null);
+                        isMarkerSearchCheckOrigin = true;
+
+                    }else{
+                        markerSearchOrigin.setPosition(originLocation);
+                        markerSearchOrigin.setTitle(searchString);
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(originLocation,15f),2000,null);
+                    }
+                }
+
+                sendRequestFindPath(originLocation,destLocation,trafficMode);
+
                 // kiểu tra xem markersearch tồn tại hay chưa
                 // nếu chưa tổn tại marker thì thêm marker mới vào
-                if(!isMarkerSearchCheckOrigin){
-                    markerSearchOrigin = mMap.addMarker(new MarkerOptions().position(originLocation).title(searchString));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(originLocation,15f),2000,null);
-                    isMarkerSearchCheckOrigin = true;
 
-                }else{
-                    markerSearchOrigin.setPosition(originLocation);
-                    markerSearchOrigin.setTitle(searchString);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(originLocation,15f),2000,null);
-                }
             }else{
 
                 destLocation = myLocation;
 
-                // kiểu tra xem markersearch tồn tại hay chưa
-                // nếu chưa tổn tại marker thì thêm marker mới vào
-                if(!markerSearchCheckDest){
-                    markerSearchDest = mMap.addMarker(new MarkerOptions().position(destLocation).title(searchString));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLocation,15f),2000,null);
-                    markerSearchCheckDest = true;
-
+                if(textSearchDest.getText().toString().equals("")){
+                    destLocation = myLocation;
+                    if(markerSearchCheckDest){
+                        markerSearchDest.remove();
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLocation,15f),2000,null);
+                    }
                 }else{
-                    markerSearchDest.setPosition(destLocation);
-                    markerSearchDest.setTitle(searchString);
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLocation,15f),2000,null);
+                    if(!markerSearchCheckDest){
+                        markerSearchDest = mMap.addMarker(new MarkerOptions().position(destLocation).title(searchString));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLocation,15f),2000,null);
+                        markerSearchCheckDest = true;
+
+                    }else{
+                        markerSearchDest.setPosition(destLocation);
+                        markerSearchDest.setTitle(searchString);
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(destLocation,15f),2000,null);
+                    }
                 }
+
+                if(textView.getId() == textSearchDest.getId()){
+                    sendRequestFindPath(originLocation,destLocation,trafficMode);
+                }
+
 
             }
         }
@@ -956,7 +1185,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public synchronized void sendRequestFindPath(LatLng origin,LatLng destination, String trafficMode){
         String TAG = "sendRequestFindPath";
 
-        if(myLocation == null){
+        if(origin == null){
             Toast.makeText(this, "Please enter origin address!", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -1054,6 +1283,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    public void handleBookMark(View view){
+        Intent intent = new Intent(this, BookMarkActivity.class);
+        startActivity(intent);
+    }
+
 
     public void invisibleKeyBoard(View view){
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -1112,7 +1346,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void backDirection(View view){
         fi.onMsgFromMainToFrag("backDirection");
-        getDeviceLocation();
 
         if(markerSearchOrigin != null){
             markerSearchOrigin.setVisible(false);
@@ -1173,33 +1406,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
        }
     }
 
-    public void visibility(View view){
-        if(view.getId() == visibility.getId()){
-            visibility.setVisibility(View.GONE);
-            visibility_off.setVisibility(View.VISIBLE);
-            listViewSearch.setVisibility(View.GONE);
-        }
-
-        if(view.getId() == visibility_off.getId()){
-            visibility.setVisibility(View.VISIBLE);
-            visibility_off.setVisibility(View.GONE);
-            listViewSearch.setVisibility(View.VISIBLE);
-        }
-    }
 
     public void clearText(View view){
 
         if(textSearch.isFocused()){
             textSearch.setText("");
-            textSearch.clearFocus();
         }
         else if(textSearchOrigin.isFocused()){
             textSearchOrigin.setText("");
-            textSearchOrigin.clearFocus();
         }else{
             textSearchDest.setText("");
-            textSearchDest.clearFocus();
         }
     }
+
+
 
 }

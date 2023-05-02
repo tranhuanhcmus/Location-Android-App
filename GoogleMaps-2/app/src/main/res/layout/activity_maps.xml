@@ -47,6 +47,17 @@
                     android:onClick="callGeoLocateForOnclick"
                     />
 
+                <ImageView
+                    android:id="@+id/iconBackSearch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/ic_back"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="10dp"
+                    android:onClick="callBackSearch"
+                    />
+
                 <AutoCompleteTextView
                     android:id="@+id/textSearch"
                     android:layout_width="250dp"
@@ -116,7 +127,32 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:background="@drawable/custom_button2">
+
+                        <ImageView
+                            android:id="@+id/iconSearchOrigin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_search"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="15dp"
+                            android:layout_marginRight="10dp"
+                            android:onClick="callGeoLocateForOnclick"
+                            android:layout_weight="1"
+                            />
+
+                        <ImageView
+                            android:id="@+id/iconBackSearchOrigin"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_back"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="15dp"
+                            android:layout_marginRight="10dp"
+                            android:onClick="callBackSearch"
+                            android:layout_weight="1"
+                            />
 
                         <AutoCompleteTextView
                             android:id="@+id/textSearchOrigin"
@@ -126,11 +162,12 @@
                             android:hint="Vị trí của bạn"
                             android:textColorHint="#242E2C"
                             android:textColor="#242E2C"
-                            android:background="@drawable/custom_button2"
+                            android:background="@null"
                             android:imeOptions="actionSearch"
                             android:singleLine="true"
                             android:completionThreshold="1"
                             android:paddingLeft="10dp"
+                            android:layout_weight="4"
                             />
 
                         <ImageView
@@ -139,6 +176,7 @@
                             android:layout_height="wrap_content"
                             android:background="@drawable/ic_micro"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                              />
 
                         <ImageView
@@ -148,6 +186,7 @@
                             android:background="@drawable/ic_x"
                             android:layout_gravity="center_vertical"
                             android:onClick="clearText"
+                            android:layout_weight="1"
                              />
 
                     </LinearLayout>
@@ -156,7 +195,32 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:layout_marginTop="5dp">
+                        android:layout_marginTop="5dp"
+                        android:background="@drawable/custom_button2">
+
+                        <ImageView
+                            android:id="@+id/iconSearchDest"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_search"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="15dp"
+                            android:layout_marginRight="10dp"
+                            android:onClick="callGeoLocateForOnclick"
+                            android:layout_weight="1"
+                            />
+
+                        <ImageView
+                            android:id="@+id/iconBackSearchDest"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/ic_back"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="15dp"
+                            android:layout_marginRight="10dp"
+                            android:onClick="callBackSearch"
+                            android:layout_weight="1"
+                            />
 
                         <AutoCompleteTextView
                             android:id="@+id/textSearchDest"
@@ -166,11 +230,12 @@
                             android:hint="Điểm đến"
                             android:textColorHint="#242E2C"
                             android:textColor="#242E2C"
-                            android:background="@drawable/custom_button2"
+                            android:background="@null"
                             android:imeOptions="actionSearch"
                             android:singleLine="true"
                             android:completionThreshold="1"
                             android:paddingLeft="10dp"
+                            android:layout_weight="4"
                             />
 
                         <ImageView
@@ -179,6 +244,7 @@
                             android:layout_height="wrap_content"
                             android:background="@drawable/ic_micro"
                             android:layout_gravity="center_vertical"
+                            android:layout_weight="1"
                              />
 
                         <ImageView
@@ -188,6 +254,7 @@
                             android:background="@drawable/ic_x"
                             android:layout_gravity="center_vertical"
                             android:onClick="clearText"
+                            android:layout_weight="1"
                              />
 
                     </LinearLayout>
@@ -309,35 +376,44 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/white"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             android:id="@+id/history">
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Lịch sử tìm kiếm"
-                android:padding="10dp"
-                android:textColor="@color/green1"
-                android:textSize="18dp"
-                android:layout_weight="1"
-                />
+                android:orientation="horizontal"
+                android:background="@color/white"
+                >
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:id="@+id/visibility"
-                android:src="@mipmap/ic_visibility"
-                android:layout_gravity="end"
-                android:onClick="visibility"/>
 
-            <ImageView
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:id="@+id/visibility_off"
-                android:src="@mipmap/ic_visibility_off"
-                android:layout_gravity="right"
-                android:onClick="visibility"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:background="@color/white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/listViewLabel"
+                    android:orientation="horizontal"
+                    android:layout_weight="10"/>
+
+
+
+
+<!--                <ImageView-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:src="@drawable/ic_more"-->
+<!--                    android:background="@drawable/custome_mort_hori"-->
+<!--                    android:layout_gravity="center_vertical"-->
+<!--                    android:onClick="startLabelActivity"-->
+<!--                    android:layout_weight="1"-->
+<!--                    />-->
+
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:background="#CFCFDD"/>
 
         </LinearLayout>
 
@@ -372,7 +448,7 @@
         android:layout_alignParentRight="true"
         android:layout_margin="15dp"
         android:src="@mipmap/ic_bookmark"
-
+        android:onClick="handleBookMark"
         />
 
 

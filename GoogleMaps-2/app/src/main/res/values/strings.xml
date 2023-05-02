@@ -2,7 +2,7 @@
     <string name="app_name">GoogleMaps</string>
     <string name="title_activity_maps">MapsActivity</string>
 
-    <string name="API_KEY">AIzaSyDy-o4RmSwJTV2kjhr3pmADv05MdUaWk34</string>
+    <string name="API_KEY">AIzaSyBrXO66ElFH2HmwJgYZn84HiEyTkwAPAqw</string>
 
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
@@ -34,9 +34,6 @@
     <!-- Fragments Names -->
     <string name="fragment_user_list">User List</string>
     <string name="fragment_image_list">Image List</string>
-
-
-
 
 
 </resources>

@@ -1,8 +1,14 @@
 package com.example.googlemaps.InfoPlace;
 
+import static com.example.googlemaps.MapsActivity.db;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +32,9 @@ import com.example.googlemaps.InfoPlace.MainCallbacks;
 import com.example.googlemaps.InfoPlace.infoPlace;
 import com.example.googlemaps.MapsActivity;
 import com.example.googlemaps.R;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 public class FragmentInfo extends Fragment implements FragmentCallbacks {
 
@@ -92,9 +102,12 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         btnDirection.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
                 map.originLocation = map.myLocation;
                 map.destLocation = infoPlace.position;
-                map.sendRequestFindPath(map.myLocation, infoPlace.position, motoMode);
+                map.sendRequestFindPath(map.originLocation, infoPlace.position, motoMode);
+                map.trafficMode = motoMode;
                 map.linearLayout1.setVisibility(View.GONE);
                 map.linearLayout2.setVisibility(View.VISIBLE);
 
@@ -104,12 +117,65 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
                 //map.textSearchOrigin.setText("Vị trí của bạn");
                 map.textSearchDest.setText(infoPlace.name);
                 map.textSearchOrigin.setText("");
+                Log.e("BtnDirection", "onClick" );
+            }
+        });
+
+        btnShare.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    shareLocation(getContext(), infoPlace.address);
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+
+        btnBookmark.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                SQLiteDatabase db = getContext().openOrCreateDatabase("myDB",Context.MODE_PRIVATE,null);
+                // nếu button bookmark đang ở trạng thái chưa lưu, click vào button lưu, nó sẽ được lưu vào bookmark
+                if(!checkIfBookMarkExist()){
+
+                    String query = "insert into Luu(name,address) values(?,?)";
+                    db.execSQL(query,new Object[]{infoPlace.name, infoPlace.address});
+                    btnBookmark.setText("Hủy lưu");
+
+                    Toast.makeText(map, "Đã lưu địa điểm vào danh mục đã lưu", Toast.LENGTH_SHORT).show();
+                }else{
+                    String query = "delete from table Luu where address=?";
+                    db.delete("Luu","address=?",new String[]{infoPlace.address});
+                    btnBookmark.setText("Yêu thích");
+                }
 
             }
         });
 
         return view_layout_detailsInfo;
 
+    }
+
+    public static void shareLocation(Context context, String address) throws UnsupportedEncodingException {
+        // Tạo Uri cho ứng dụng của bạn
+        String encode = URLEncoder.encode(address,"UTF-8");
+        String link = "http://www.my_google_maps.com/location?address=" + encode;
+        Uri uri = Uri.parse(link);
+
+        // Tạo intent chia sẻ thông tin vị trí
+        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "Chia sẻ vị trí");
+        shareIntent.putExtra(Intent.EXTRA_TEXT, address + "\n" + uri);
+
+
+        // Khởi tạo ShareSheet
+        Intent chooserIntent = Intent.createChooser(shareIntent, "Chia sẻ vị trí");
+
+        // Start activity để chia sẻ thông tin vị trí
+        context.startActivity(chooserIntent);
     }
 
     @Override
@@ -120,6 +186,9 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         address.setText(infoPlace.address);
         rating.setText("Rating: " + infoPlace.rating);
 
+        if(checkIfBookMarkExist()){
+            btnBookmark.setText("Hủy lưu");
+        }
 
     }
 
@@ -131,6 +200,8 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
 
             linearLayoutFrag2.setVisibility(View.GONE);
             linearLayoutFrag1.setVisibility(View.VISIBLE);
+
+
         }
     }
 
@@ -144,6 +215,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
 
         // mặc định mới vào tìm địa chỉ thì traffic mode là xe gắn máy
         if(view == null){
+            map.trafficMode = motoMode;
             map.timeMoto.setText(infoPlace.duration.text);
             map.findViewById(R.id.moto).setBackgroundColor(Color.parseColor("#66FFFF"));
         }
@@ -151,18 +223,22 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         // set text trên icon traffic mode
         if(view != null){
             if(this.view.getId() == map.findViewById(R.id.car).getId()){
+                map.trafficMode = drivingMode;
                 map.timeCar.setText(infoPlace.duration.text);
             }
 
             if(this.view.getId() == map.findViewById(R.id.moto).getId()){
+                map.trafficMode = motoMode;
                 map.timeMoto.setText(infoPlace.duration.text);
             }
 
             if(this.view.getId() == map.findViewById(R.id.bus).getId()){
+                map.trafficMode = transitMode;
                 map.timeBus.setText(infoPlace.duration.text);
             }
 
             if(this.view.getId() == map.findViewById(R.id.walk).getId()){
+                map.trafficMode = walkMode;
                 map.timeWalk.setText(infoPlace.duration.text);
             }
         }
@@ -173,5 +249,16 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
     @Override
     public void onMsgFromMainToFrag(View view) {
         this.view = view;
+    }
+
+    public boolean checkIfBookMarkExist(){
+        SQLiteDatabase db = getContext().openOrCreateDatabase("myDB",Context.MODE_PRIVATE,null);
+        String query = "select * from Luu where address=?";
+        Cursor cursor = db.rawQuery(query,new String[]{infoPlace.address});
+        if(cursor.moveToFirst()){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:id="@+id/linearInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingBottom="10dp"
+        android:layout_marginTop="5dp">
+
+        <ImageView
+            android:id="@+id/delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_x" />
+
+        <TextView
+            android:id="@+id/name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="-30dp"
+            android:text="Chợ đại phước"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/ic_marker" />
+
+            <TextView
+                android:id="@+id/address"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:text="Chợ đại phước"
+                android:textSize="16dp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/rating"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="Rating"
+            android:textSize="16dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/listViewImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="10dp"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="10dp"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/direction"
+                    android:layout_width="165dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/custom_button"
+                    android:backgroundTint="@color/blue1"
+                    android:drawableLeft="@drawable/ic_direction"
+                    android:drawablePadding="15dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="Chỉ đường"
+                    android:textColor="@color/white"
+                    android:textSize="14dp" />
+
+
+                <androidx.appcompat.widget.AppCompatButton
+                    android:id="@+id/share"
+                    android:layout_width="165dp"
+                    android:layout_height="40dp"
+                    android:layout_marginLeft="20dp"
+                    android:background="@drawable/custom_button"
+                    android:drawableLeft="@drawable/ic_share"
+                    android:drawablePadding="15dp"
+                    android:paddingHorizontal="20dp"
+                    android:text="Chia sẻ"
+                    android:textColor="@color/blue1"
+                    android:textSize="14dp" />
+
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+
+
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
