@@ -687,8 +687,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-
-
+        getDeviceLocation();
 
         LatLng HoChiMinhLocation = new LatLng(10.823099, 106.629662);
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HoChiMinhLocation,15f),2000,null);
@@ -1181,29 +1180,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
- // ham gui yeu cau tim duong di
-    public synchronized void sendRequestFindPath(LatLng origin,LatLng destination, String trafficMode){
-        String TAG = "sendRequestFindPath";
 
-        if(origin == null){
-            Toast.makeText(this, "Please enter origin address!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        if(destination == null){
-            Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        try{
-            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this,origin, destination);
-            finder.execute(trafficMode);
-        }catch (Exception e){
-            Log.e(TAG, "sendRequestFindPath: " + e.getMessage() );
-        }
-
-
-    }
 
     public void getPermissionFromUser(){
         String permission[] = {
@@ -1294,7 +1271,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
+    // ham gui yeu cau tim duong di
+    public synchronized void sendRequestFindPath(LatLng origin,LatLng destination, String trafficMode){
+        String TAG = "sendRequestFindPath";
 
+        if(origin == null){
+            Toast.makeText(this, "Please enter origin address!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(destination == null){
+            Toast.makeText(this, "Please enter destination address!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try{
+            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this,origin, destination);
+            finder.execute(trafficMode);
+        }catch (Exception e){
+            Log.e(TAG, "sendRequestFindPath: " + e.getMessage() );
+        }
+
+
+    }
     @Override
     public void onStartFindDirection() {
         if(polyPaths != null){

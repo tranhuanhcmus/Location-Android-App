@@ -95,6 +95,17 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
             JSONObject end_location = leg.getJSONObject("end_location");
             String start_address = leg.getString("start_address");
             JSONObject start_location = leg.getJSONObject("start_location");
+            JSONArray steps = leg.getJSONArray("steps");
+
+            // first step
+            JSONObject firstStepObject = steps.getJSONObject(0);
+            String firstStep = firstStepObject.getString("html_instructions");
+            JSONObject distanceFirstStep = firstStepObject.getJSONObject("distance");
+            int valueDistanceFirstStep = distanceFirstStep.getInt("value");
+
+            // second step
+            JSONObject secondStepObject = steps.getJSONObject(1);
+            String maneuver = secondStepObject.getString("maneuver");
 
             Route route = new Route();
             route.start_address = start_address;
@@ -103,6 +114,10 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
             route.duration = new Duration(duration.getString("text"),duration.getInt("value"));
             route.start_location = new LatLng(start_location.getDouble("lat"),start_location.getDouble("lng"));
             route.end_location = new LatLng(end_location.getDouble("lat"),end_location.getDouble("lng"));
+            route.firstStep = firstStep;
+            route.distanceFirstStep = valueDistanceFirstStep;
+
+            route.maneuver = maneuver;
 
             route.polyline = decodePolyLine(poly.getString("points"));
 

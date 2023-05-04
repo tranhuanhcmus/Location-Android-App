@@ -5,9 +5,26 @@ plugins {
 
 }
 
+configurations {
+    all {
+        resolutionStrategy {
+            // do not upgrade above 3.12.0 to support API < 21 while server uses
+            // COMPATIBLE_TLS, or okhttp3 is used in project
+            force 'com.squareup.okhttp3:okhttp:3.12.0'
+            force 'com.squareup.okhttp3:logging-interceptor:3.12.0'
+        }
+    }
+}
+
 android {
     namespace 'com.example.googlemaps'
     compileSdk 33
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/io.netty.versions.properties'
+        exclude 'META-INF/INDEX.LIST'
+    }
 
     defaultConfig {
         applicationId "com.example.googlemaps"
@@ -23,7 +40,9 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+
         }
+
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -63,10 +82,14 @@ dependencies {
     // Maps utils (required for custom markers)
     implementation 'com.google.maps.android:android-maps-utils:0.5+'
 
+
     // Google Maps Services (needed for directions)
     implementation 'com.google.maps:google-maps-services:2.2.0'
     implementation 'org.slf4j:slf4j-nop:1.7.25'
 
     implementation 'com.github.bumptech.glide:glide:4.8.0'
+
+    implementation 'com.google.mlkit:translate:17.0.1'
+
 
 }

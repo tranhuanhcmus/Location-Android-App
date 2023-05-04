@@ -44,7 +44,7 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="10dp"
-        android:background="@drawable/custome_view"
+        android:background="@drawable/custom_view"
         app:layout_constraintTop_toBottomOf="@+id/textView2"
         android:layout_marginTop="10dp"/>
 

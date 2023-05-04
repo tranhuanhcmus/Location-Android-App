@@ -1,5 +1,6 @@
 package com.example.googlemaps.InfoPlace;
 
+import static android.content.Context.PRINT_SERVICE;
 import static com.example.googlemaps.MapsActivity.db;
 
 import android.annotation.SuppressLint;
@@ -27,6 +28,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.googlemaps.Direction.Distance;
 import com.example.googlemaps.Direction.Duration;
+import com.example.googlemaps.GuideDirection.GuideByText;
 import com.example.googlemaps.InfoPlace.FragmentCallbacks;
 import com.example.googlemaps.InfoPlace.MainCallbacks;
 import com.example.googlemaps.InfoPlace.infoPlace;
@@ -47,7 +49,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
     AppCompatButton btnStart;
     AppCompatButton btnBookmark;
     AppCompatButton btnShare;
-
+    AppCompatButton btnStart2;
     TextView time;
 
     TextView distance;
@@ -89,6 +91,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         btnDirection = view_layout_detailsInfo.findViewById(R.id.direction);
         btnBookmark = view_layout_detailsInfo.findViewById(R.id.save);
         btnStart = view_layout_detailsInfo.findViewById(R.id.start);
+        btnStart2 = view_layout_detailsInfo.findViewById(R.id.start2);
         btnShare = view_layout_detailsInfo.findViewById(R.id.share);
 
         time = view_layout_detailsInfo.findViewById(R.id.time);
@@ -153,6 +156,40 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
 
             }
         });
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), GuideByText.class);
+                Bundle bundle = new Bundle();
+                bundle.putDouble("latitudeOrigin",map.myLocation.latitude);
+                bundle.putDouble("longitudeOrigin",map.myLocation.longitude);
+                bundle.putDouble("latitudeDest",infoPlace.position.latitude);
+                bundle.putDouble("longitudeDest",infoPlace.position.longitude);
+                bundle.putString("trafficMode",map.trafficMode);
+                bundle.putString("address", infoPlace.address);
+                intent.putExtras(bundle);
+                startActivity(intent);
+
+            }
+        });
+
+        btnStart2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getContext(), GuideByText.class);
+                Bundle bundle = new Bundle();
+                bundle.putDouble("latitudeOrigin",map.myLocation.latitude);
+                bundle.putDouble("longitudeOrigin",map.myLocation.longitude);
+                bundle.putDouble("latitudeDest",infoPlace.position.latitude);
+                bundle.putDouble("longitudeDest",infoPlace.position.longitude);
+                bundle.putString("trafficMode",map.trafficMode);
+                bundle.putString("address", infoPlace.address);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            }
+        });
+
 
         return view_layout_detailsInfo;
 

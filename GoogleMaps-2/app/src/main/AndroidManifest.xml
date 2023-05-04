@@ -21,11 +21,14 @@
         android:theme="@style/Theme.GoogleMaps"
         tools:targetApi="31">
         <activity
+            android:name=".GuideDirection.GuideByText"
+            android:exported="false" />
+        <activity
             android:name=".BookMark.BookMarkActivity"
             android:exported="false" />
         <activity
             android:name=".PlaceLabeling.setNameLabel"
-            android:exported="false"></activity>
+            android:exported="false" />
         <activity
             android:name=".ChooseLocationOnMap"
             android:exported="false" />

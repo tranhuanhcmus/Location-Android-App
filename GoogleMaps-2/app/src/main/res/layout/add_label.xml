@@ -36,7 +36,7 @@
         android:id="@+id/view"
         android:layout_width="match_parent"
         android:layout_height="10dp"
-        android:background="@drawable/custome_view"
+        android:background="@drawable/custom_view"
         app:layout_constraintTop_toBottomOf="@+id/textView"
         android:layout_marginTop="10dp"/>
 
@@ -131,7 +131,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginRight="10dp"
-            android:background="@drawable/custome_widgets_label"
+            android:background="@drawable/custom_widgets_label"
             android:padding="5dp">
 
             <ImageView

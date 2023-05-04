@@ -4,6 +4,9 @@
 
     <string name="API_KEY">AIzaSyBrXO66ElFH2HmwJgYZn84HiEyTkwAPAqw</string>
 
+<!--Project ID-->
+    <string name="ProjectId">silicon-clock-385511</string>
+
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password (optional)</string>
     <string name="action_sign_in">Sign in or register</string>

@@ -14,6 +14,9 @@ public class Route {
     public String start_address;
     public String travel_mode;
     public List<LatLng> polyline;
+    public String firstStep;
+    public String maneuver;
+    public int distanceFirstStep;
 
     public Route(){
 

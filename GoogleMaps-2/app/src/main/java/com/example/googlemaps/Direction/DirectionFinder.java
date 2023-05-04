@@ -27,10 +27,10 @@ public class DirectionFinder {
         String urlDestination = String.valueOf(destination.latitude) + "," + String.valueOf(destination.longitude);
 
         if(mode == "moto"){
-            return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination +"&mode="+ mode + "&vehicleType=2" + "&key=" + context.getString(R.string.API_KEY);
+            return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination +"&language=vi" +"&mode="+ mode + "&vehicleType=2" + "&key=" + context.getString(R.string.API_KEY);
         }
 
-        return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination +"&mode="+ mode + "&key=" + context.getString(R.string.API_KEY);
+        return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination + "&language=vi" +"&mode="+ mode + "&key=" + context.getString(R.string.API_KEY);
     }
 
     public void execute(String trafficMode){
