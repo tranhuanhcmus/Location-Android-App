@@ -84,7 +84,7 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
         JSONArray jsonRoutes = jsonData.getJSONArray("routes");
 
         for(int i = 0; i < jsonRoutes.length(); i++){
-            JSONObject jsonRoute = jsonRoutes.getJSONObject(0);
+            JSONObject jsonRoute = jsonRoutes.getJSONObject(i);
 
             JSONObject poly = jsonRoute.getJSONObject("overview_polyline");
 
@@ -106,7 +106,7 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
             int valueDistanceFirstStep = distanceFirstStep.getInt("value");
 
             // second step
-            String maneuver = "";
+            String maneuver = "null";
             JSONObject secondStepObject ;
             // kiểm tra xem có phải là đoạn đường cuối cùng không
             if(steps.length() > 1){
@@ -114,9 +114,12 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
                 Log.e(TAG, "secondStepObject: "+secondStepObject.getString("travel_mode") );
                 if(secondStepObject.has("maneuver")){
 
-                    Log.e(TAG, "mode traffic: "+mode );
-                    Log.e(TAG, "maneuver: !=transit" );
                     maneuver = secondStepObject.getString("maneuver");
+                    Log.e(TAG, "mode traffic: "+mode );
+                    Log.e(TAG, "maneuver: " + maneuver );
+                    if (maneuver == null){
+                        maneuver = "null";
+                    }
 
                 }
             }

@@ -155,11 +155,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static ImageView imgSearchDest;
     private static ImageView imgBackSearchDest;
 
-    private static ImageView micro;
     private static ImageView clearText;
-    private static ImageView micro1;
     private static ImageView clearText1;
-    private static ImageView micro2;
     private static ImageView clearText2;
     public static ListView listViewSearch;
     public static RecyclerView listViewLabel;
@@ -259,15 +256,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         textSearchOrigin = findViewById(R.id.textSearchOrigin);
         textSearchDest = findViewById(R.id.textSearchDest);
 
-        micro = findViewById(R.id.micro);
+
         clearText = findViewById(R.id.clearText);
         clearText.setVisibility(View.GONE);
 
-        micro1 = findViewById(R.id.micro1);
+
         clearText1 = findViewById(R.id.clearText1);
         clearText1.setVisibility(View.GONE);
 
-        micro2 = findViewById(R.id.micro2);
+
         clearText2 = findViewById(R.id.clearText2);
         clearText2.setVisibility(View.GONE);
 
@@ -281,9 +278,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         history = findViewById(R.id.history);
         history.setVisibility(View.GONE);
-
-
-
 
 
         linearLayout1 = findViewById(R.id.relative1);
@@ -552,13 +546,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             // phần ẩn và hiện micro
             if(textView.getId() == textSearch.getId()){
-                micro.setVisibility(View.GONE);
+
                 clearText.setVisibility(View.VISIBLE);
             }else if(textView.getId() == textSearchOrigin.getId()){
-                micro1.setVisibility(View.GONE);
+
                 clearText1.setVisibility(View.VISIBLE);
             }else{
-                micro2.setVisibility(View.GONE);
+
                 clearText2.setVisibility(View.VISIBLE);
             }
 
@@ -599,13 +593,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             history.setVisibility(View.GONE);
 
             if(textView.getId() == textSearch.getId()){
-                micro.setVisibility(View.VISIBLE);
+
                 clearText.setVisibility(View.GONE);
             }else if(textView.getId() == textSearchOrigin.getId()){
-                micro1.setVisibility(View.VISIBLE);
+
                 clearText1.setVisibility(View.GONE);
             }else{
-                micro2.setVisibility(View.VISIBLE);
+
                 clearText2.setVisibility(View.GONE);
             }
         }
@@ -817,6 +811,58 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         if(bundle != null && bundle.containsKey("fromBookMark")){
             textSearch.setText(bundle.getString("fromBookMark"));
             geoLocate(textSearch,"dest");
+
+            String name = textSearch.getText().toString();
+            // lấy place id thông qua autoComplete
+            FindAutocompletePredictionsRequest request = FindAutocompletePredictionsRequest.builder()
+                    .setQuery(name) // Tìm kiếm địa điểm theo tên
+                    .build();
+
+            // Thực hiện truy vấn
+            Task<FindAutocompletePredictionsResponse> task = placesClient.findAutocompletePredictions(request);
+
+            // Xử lý kết quả trả về
+            task.addOnSuccessListener((response) -> {
+                if (!response.getAutocompletePredictions().isEmpty()) {
+                    // Lấy Place ID của địa điểm đầu tiên
+                    String placeId = response.getAutocompletePredictions().get(0).getPlaceId();
+                    Log.e("Place ID", placeId);
+
+                    List<Place.Field> placeFields = Arrays.asList(Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.PHOTO_METADATAS);
+                    FetchPlaceRequest request2 = FetchPlaceRequest.builder(placeId, placeFields).build();
+
+                    // Gửi yêu cầu truy vấn địa điểm và xử lý kết quả trả về
+                    placesClient.fetchPlace(request2).addOnSuccessListener((response2) -> {
+                        Place place = response2.getPlace();
+
+
+                        // gửi infoPlace qua cho fragment khi click vào marker
+                        infoPlace = new infoPlace(place.getName(),response.getAutocompletePredictions().get(0).getFullText(null).toString(),
+                                String.valueOf(place.getRating()),place.getLatLng());
+                        fi.onMsgFromMainToFrag(infoPlace);
+                        frameLayout.setVisibility(View.VISIBLE);
+
+//                            List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
+//                            if (photoMetadataList != null && photoMetadataList.size() > 0) {
+//                                PhotoMetadata photoMetadata = photoMetadataList.get(0);
+//                                String photoUrl = photoMetadata.getAttributions();
+//
+//                                Log.e(TAG, "Photo URL: " + photoUrl);
+//                            }
+
+
+                    }).addOnFailureListener((exception) -> {
+                        if (exception instanceof ApiException) {
+                            ApiException apiException = (ApiException) exception;
+                            int statusCode = apiException.getStatusCode();
+
+                        }
+                    });
+
+                }
+            }).addOnFailureListener((exception) -> {
+                Log.e("Error", "Error getting autocomplete predictions", exception);
+            });
         }
 
     }
@@ -1340,7 +1386,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
         try{
-            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this,origin, destination);
+            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this,origin, destination,true);
             finder.execute(trafficMode);
         }catch (Exception e){
             Log.e(TAG, "sendRequestFindPath: " + e.getMessage() );
@@ -1360,14 +1406,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSuccessFindDirection(List<Route> routeList) {
 
+        int index = 0;
         for(Route route : routeList){
             
             List<LatLng> points = new ArrayList<>();
-
-            PolylineOptions polylineOptions = new PolylineOptions().
-                    geodesic(true).
-                    color(Color.rgb(123, 133, 237)).
-                    width(10);
+            PolylineOptions polylineOptions;
+            if(index == 0){
+                polylineOptions = new PolylineOptions().
+                        geodesic(true).
+                        color(Color.rgb(123, 133, 237)).
+                        width(10);
+            }else{
+                polylineOptions = new PolylineOptions().
+                        geodesic(true).
+                        color(Color.rgb(183, 187, 204)).
+                        width(10);
+            }
+            index ++;
 
             for(int i = 0; i < route.polyline.size(); i++){
                 polylineOptions.add(route.polyline.get(i));

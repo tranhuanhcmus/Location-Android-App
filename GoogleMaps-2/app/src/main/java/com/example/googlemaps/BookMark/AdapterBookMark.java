@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +59,15 @@ public class AdapterBookMark extends ArrayAdapter<infoPlace> {
 
         TextView rating = convertView.findViewById(R.id.rating);
         rating.setText("Rating: "+ip.rating);
+
+        if(ip.rating == "null" ){
+            rating.setVisibility(View.GONE);
+            RatingBar ratingBar = convertView.findViewById(R.id.starRating);
+            ratingBar.setVisibility(View.GONE);
+        }else{
+            RatingBar ratingBar = convertView.findViewById(R.id.starRating);
+            ratingBar.setRating(Float.parseFloat(ip.rating));
+        }
 
         RecyclerView listViewImage = convertView.findViewById(R.id.listViewImage);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false);

@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +36,7 @@ import com.example.googlemaps.InfoPlace.MainCallbacks;
 import com.example.googlemaps.InfoPlace.infoPlace;
 import com.example.googlemaps.MapsActivity;
 import com.example.googlemaps.R;
+import com.example.googlemaps.StarRatingView.StarRating;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -46,6 +48,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
     TextView name;
     TextView address;
     TextView rating;
+    RatingBar starRating;
     AppCompatButton btnDirection;
     AppCompatButton btnStart;
     AppCompatButton btnBookmark;
@@ -89,6 +92,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         name = view_layout_detailsInfo.findViewById(R.id.name);
         address = view_layout_detailsInfo.findViewById(R.id.address);
         rating = view_layout_detailsInfo.findViewById(R.id.rating);
+        starRating = view_layout_detailsInfo.findViewById(R.id.starRating);
         btnDirection = view_layout_detailsInfo.findViewById(R.id.direction);
         btnBookmark = view_layout_detailsInfo.findViewById(R.id.save);
         btnStart = view_layout_detailsInfo.findViewById(R.id.start);
@@ -230,16 +234,25 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         this.infoPlace = infoPlace;
         name.setText(infoPlace.name);
         address.setText(infoPlace.address);
-        rating.setText("Rating: " + infoPlace.rating);
 
+        if(!infoPlace.rating.equals("null")){
+            rating.setVisibility(View.VISIBLE);
+            starRating.setVisibility(View.VISIBLE);
+            rating.setText("Rating: " + infoPlace.rating);
+            starRating.setRating(Float.parseFloat(infoPlace.rating));
+
+        }else{
+            rating.setVisibility(View.GONE);
+            starRating.setVisibility(View.GONE);
+        }
 
 
         if(checkIfBookMarkExist()){
             btnBookmark.setText("Hủy lưu");
-            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_add);
+            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_remove);
             btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
         }else{
-            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_remove);
+            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_add);
             btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
         }
 

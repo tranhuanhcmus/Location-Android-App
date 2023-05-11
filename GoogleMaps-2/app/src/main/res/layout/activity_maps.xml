@@ -64,22 +64,14 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:hint="Tìm kiếm tại đây"
-                    android:textColorHint="#0A9877"
-                    android:textColor="#0A9877"
+                    android:textColorHint="#878869"
+                    android:textColor="#878869"
                     android:background="@null"
                     android:imeOptions="actionSearch"
                     android:singleLine="true"
                     android:completionThreshold="1"
                     />
 
-                <ImageView
-                    android:id="@+id/micro"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/ic_micro"
-                    android:layout_gravity="center_vertical"
-
-                    />
 
                 <ImageView
                     android:id="@+id/clearText"
@@ -113,7 +105,7 @@
                     android:id="@+id/back"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:src="@mipmap/ic_back"
+                    android:src="@drawable/ic_back"
                     android:layout_marginTop="10dp"
                     android:onClick="backDirection"/>
 
@@ -128,7 +120,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:background="@drawable/custom_button2">
+                        android:background="@drawable/custom_edit_text">
 
                         <ImageView
                             android:id="@+id/iconSearchOrigin"
@@ -139,7 +131,7 @@
                             android:layout_marginLeft="15dp"
                             android:layout_marginRight="10dp"
                             android:onClick="callGeoLocateForOnclick"
-                            android:layout_weight="1"
+
                             />
 
                         <ImageView
@@ -151,7 +143,7 @@
                             android:layout_marginLeft="15dp"
                             android:layout_marginRight="10dp"
                             android:onClick="callBackSearch"
-                            android:layout_weight="1"
+
                             />
 
                         <AutoCompleteTextView
@@ -167,17 +159,9 @@
                             android:singleLine="true"
                             android:completionThreshold="1"
                             android:paddingLeft="10dp"
-                            android:layout_weight="4"
+
                             />
 
-                        <ImageView
-                            android:id="@+id/micro1"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/ic_micro"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                             />
 
                         <ImageView
                             android:id="@+id/clearText1"
@@ -186,7 +170,7 @@
                             android:background="@drawable/ic_x"
                             android:layout_gravity="center_vertical"
                             android:onClick="clearText"
-                            android:layout_weight="1"
+
                              />
 
                     </LinearLayout>
@@ -196,7 +180,7 @@
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
                         android:layout_marginTop="5dp"
-                        android:background="@drawable/custom_button2">
+                        android:background="@drawable/custom_edit_text">
 
                         <ImageView
                             android:id="@+id/iconSearchDest"
@@ -207,7 +191,7 @@
                             android:layout_marginLeft="15dp"
                             android:layout_marginRight="10dp"
                             android:onClick="callGeoLocateForOnclick"
-                            android:layout_weight="1"
+
                             />
 
                         <ImageView
@@ -219,7 +203,7 @@
                             android:layout_marginLeft="15dp"
                             android:layout_marginRight="10dp"
                             android:onClick="callBackSearch"
-                            android:layout_weight="1"
+
                             />
 
                         <AutoCompleteTextView
@@ -235,17 +219,9 @@
                             android:singleLine="true"
                             android:completionThreshold="1"
                             android:paddingLeft="10dp"
-                            android:layout_weight="4"
+
                             />
 
-                        <ImageView
-                            android:id="@+id/micro2"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:background="@drawable/ic_micro"
-                            android:layout_gravity="center_vertical"
-                            android:layout_weight="1"
-                             />
 
                         <ImageView
                             android:id="@+id/clearText2"
@@ -254,7 +230,7 @@
                             android:background="@drawable/ic_x"
                             android:layout_gravity="center_vertical"
                             android:onClick="clearText"
-                            android:layout_weight="1"
+
                              />
 
                     </LinearLayout>
@@ -455,6 +431,7 @@
         android:layout_below="@id/gps"
         android:layout_alignParentRight="true"
         android:layout_margin="15dp"
+        android:padding="5dp"
         android:src="@drawable/ic_bookmarks"
         android:background="@drawable/custom_mort_hori"
         android:onClick="handleBookMark"

@@ -13,12 +13,14 @@ public class DirectionFinder {
     DIrectionListener listener;
     LatLng origin;
     LatLng destination;
+    boolean alternatives;
 
-    public DirectionFinder(Context context,DIrectionListener listener, LatLng origin, LatLng destination){
+    public DirectionFinder(Context context,DIrectionListener listener, LatLng origin, LatLng destination,boolean alternatives){
         this.listener = listener;
         this.origin = origin;
         this.destination = destination;
         this.context = context;
+        this.alternatives = alternatives;
     }
 
     public String createUrlDirection(String mode){
@@ -26,11 +28,15 @@ public class DirectionFinder {
         String urlOrigin = String.valueOf(origin.latitude) + "," + String.valueOf(origin.longitude);
         String urlDestination = String.valueOf(destination.latitude) + "," + String.valueOf(destination.longitude);
 
+        String totalUrl = urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination +"&language=vi" +"&mode="+ mode;
+        if(alternatives){
+            totalUrl += "&alternatives=true";
+        }
         if(mode == "moto"){
-            return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination +"&language=vi" +"&mode="+ mode + "&vehicleType=2" + "&key=" + context.getString(R.string.API_KEY);
+            return totalUrl + "&vehicleType=2" + "&key=" + context.getString(R.string.API_KEY);
         }
 
-        return urlDirectionAPI + "origin="+urlOrigin + "&destination=" + urlDestination + "&language=vi" +"&mode="+ mode + "&key=" + context.getString(R.string.API_KEY);
+        return totalUrl + "&key=" + context.getString(R.string.API_KEY);
     }
 
     public void execute(String trafficMode){

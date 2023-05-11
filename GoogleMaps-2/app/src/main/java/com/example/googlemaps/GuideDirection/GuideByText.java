@@ -296,7 +296,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         }
 
         try {
-            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this, origin, destination);
+            DirectionFinder finder = new DirectionFinder(getApplicationContext(), this, origin, destination, false);
             finder.execute(trafficMode);
         } catch (Exception e) {
             Log.e(TAG, "sendRequestFindPath: " + e.getMessage());
@@ -316,7 +316,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
 
     @Override
     public void onSuccessFindDirection(List<Route> routeList) {
-        Log.e(TAG, "onSuccessFindDirection: " + routeList.get(0).firstStep);
+        //Log.e(TAG, "onSuccessFindDirection: " + routeList.get(0).firstStep);
         //Toast.makeText(GuideByText.this, routeList.get(0).firstStep, Toast.LENGTH_SHORT).show();
         for (Route route : routeList) {
 
@@ -361,11 +361,19 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
             // kiểm tra xem đoạn đường này có khoản cách < 200m không, nếu bé hơn 100m thì chỉ đường đi tiếp theo, không thì
             // không cần chỉ đường đi tiếp theo
             if(routeList.get(0).distanceFirstStep < 200){
+
                 // tìm hành động cần làm sau khi đi hết đường
                 String nextManeuver = maneuver.convertToVietnamese(routeList.get(0).maneuver);
-                String guideText2 = "Sau đó, "+nextManeuver;
-                guide2.setText(guideText2);
-                guide2.setVisibility(View.VISIBLE);
+                String guideText2 = "";
+                // nếu có hành động tiếp theo thì chỉ, không thì thôi
+                if(nextManeuver != null){
+                    guideText2 = "Sau đó, "+nextManeuver;
+                    guide2.setText(guideText2);
+                    guide2.setVisibility(View.VISIBLE);
+                }else{
+                    guide2.setVisibility(View.GONE);
+                }
+
                 new SpeechTask().execute(guideText1 + "." + guideText2);
             }else{
                 // không thì chỉ đường thôi
@@ -374,7 +382,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
             }
 
             prevRoad = curRoad;
-            Log.e(TAG, "onSuccessFindDirection: firstStep");
+            //Log.e(TAG, "onSuccessFindDirection: firstStep");
         }
         // nếu chưa thì
         else{
