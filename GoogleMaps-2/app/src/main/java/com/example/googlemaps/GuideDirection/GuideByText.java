@@ -34,6 +34,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -66,6 +67,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
 
     GoogleMap map;
     private LatLng myLocation = null;
+    private boolean checkFirstLocation = false ;
     private LatLng destination;
     private String addressDest;
     private String trafficMode;
@@ -161,14 +163,14 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
 
         map.addMarker(new MarkerOptions().position(destination).title(addressDest));
 
-        Log.e(TAG, "onLocationChanged: " + String.valueOf(myLocation.latitude) + " " + String.valueOf(myLocation.longitude) +
-                String.valueOf(destination.latitude) + " " + String.valueOf(destination.longitude));
+        //Log.e(TAG, "onLocationChanged: " + String.valueOf(myLocation.latitude) + " " + String.valueOf(myLocation.longitude) +
+        //String.valueOf(destination.latitude) + " " + String.valueOf(destination.longitude));
 
         sendRequestFindPath(myLocation, destination, trafficMode);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         LocationRequest locationRequest = LocationRequest.create()
-                .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setInterval(10000)
                 .setFastestInterval(5000)
                 .setSmallestDisplacement(5);
@@ -182,19 +184,8 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
             }
         };
 
-
-
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
 
-        // khởi tạo translate
-        TranslatorOptions translatorOptions = new TranslatorOptions.Builder()
-                .setSourceLanguage(TranslateLanguage.ENGLISH)
-                .setTargetLanguage(TranslateLanguage.VIETNAMESE)
-                .build();
-        translator = Translation.getClient(translatorOptions);
-
-        // tải model nếu chưa có
-        downloadModel();
 
     }
 
@@ -203,7 +194,6 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mapFragment.getView().setBackgroundColor(Color.argb((float)1.0, (float)0.0, (float)0.0, (float)0.0));
 
     }
 
@@ -214,8 +204,6 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         Log.e("getDeviceLocation", "getMyLocation");
 
         try {
-
-
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
@@ -227,6 +215,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
+
                             Location location = (Location) getLocation.getResult();
                             if (location == null) {
                                 myLocation = null;
@@ -244,7 +233,15 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                                     .tilt(tilt)
                                     .build();
                             CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
-                            map.animateCamera(cameraUpdate, 2000, null);
+
+                            if(checkFirstLocation == false){
+                                map.animateCamera(cameraUpdate, 10, null);
+                            } else{
+                                map.animateCamera(cameraUpdate, 2000, null);
+                            }
+
+                            checkFirstLocation = true;
+
                             Log.e("loop", "getDeviceLocation: not null " + String.valueOf(myLocation.latitude));
 
                         }
@@ -342,7 +339,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
 
         // cập nhật giao diện
         timeDuration.setText(routeList.get(0).duration.text);
-        distance.setText(routeList.get(0).duration.text);
+        distance.setText(routeList.get(0).distance.text);
 
         EstimateTime estimateTime = new EstimateTime();
         estimatedTime.setText(estimateTime.estimate(routeList.get(0).duration.value));
@@ -355,6 +352,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         // kiểm tra xem có qua đường mới chưa
         // nếu rồi thì hiển thị giọng nói đầu đoạn đường
         String guideText1 = String.valueOf(Html.fromHtml(routeList.get(0).firstStep,Html.FROM_HTML_MODE_COMPACT));
+        guideText1.replace("Đ.","đường ");
         if(!curRoad.equals(prevRoad)){
 
             check100m = true;
@@ -380,7 +378,6 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         }
         // nếu chưa thì
         else{
-
             // kiểm tra xem đã đến gần đến đoạn đường tiếp theo chưa, nếu < 100m nữa đến đoạn đường tiếp theo thì
             if(routeList.get(0).distanceFirstStep < 100 && check100m){
                 check100m = false;
@@ -398,15 +395,7 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                 new SpeechTask().execute( guideText2);
             }
 
-
         }
-
-
-
-
-
-
-
 
     }
 
@@ -415,28 +404,6 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         Log.e(TAG, "callSpeech: "+text );
     }
 
-    // download translate if need
-
-    private void downloadModel(){
-
-
-        DownloadConditions downloadConditions = new DownloadConditions.Builder()
-                .requireWifi()
-                .build();
-        translator.downloadModelIfNeeded(downloadConditions)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        checkTranslate = true;
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        checkTranslate = false;
-                    }
-                });
-    }
 
     @Override
     public void onBackPressed() {
