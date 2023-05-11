@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Walking.WalkingActivity">
+
+    <fragment
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".Walking.WalkingActivity"
+        />
+
+    <LinearLayout
+        android:id="@+id/linear1"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_walking_mode"
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:id="@+id/title1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:textSize="20dp"
+            android:text="Bạn đang ở chế độ chạy bộ!"
+            android:textColor="@color/white"
+            android:layout_gravity="center_horizontal"/>
+
+
+    </LinearLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/custom_info_guide">
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_close_white"
+            android:background="@drawable/custom_close_white"
+            app:layout_constraintTop_toTopOf="@+id/info"
+            app:layout_constraintLeft_toLeftOf="@+id/info"
+            android:layout_margin="10dp"
+            android:onClick="close"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="@id/info"
+            app:layout_constraintBottom_toBottomOf="@id/info"
+            app:layout_constraintLeft_toLeftOf="@id/info"
+            app:layout_constraintRight_toRightOf="@id/info"
+            android:layout_marginBottom="10dp"
+            android:layout_marginTop="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="20dp"
+                android:id="@+id/totalDistance"
+                android:layout_gravity="center_horizontal"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="5dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#EAEAEA"
+                    android:textSize="16dp"
+                    android:id="@+id/totalStep"/>
+
+                <ImageView
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:layout_margin="10dp"
+                    android:background="@drawable/ic_circle"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#EAEAEA"
+                    android:textSize="16dp"
+                    android:id="@+id/calo"/>
+
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/gps"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            app:layout_constraintEnd_toEndOf="@+id/info"
+            app:layout_constraintTop_toTopOf="@+id/info"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_gps2"
+            android:background="@drawable/custom_close_white"
+            android:padding="10dp"
+            android:onClick="handleGps"
+
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
