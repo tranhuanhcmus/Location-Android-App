@@ -35,7 +35,7 @@ public class DirectionFinder {
 
     public void execute(String trafficMode){
         listener.onStartFindDirection();
-        DownloadJsonDirection downloadJsonDirection = new DownloadJsonDirection(listener);
+        DownloadJsonDirection downloadJsonDirection = new DownloadJsonDirection(listener, trafficMode);
         downloadJsonDirection.execute(createUrlDirection(trafficMode));
     }
 

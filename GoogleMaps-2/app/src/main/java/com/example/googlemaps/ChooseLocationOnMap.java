@@ -25,10 +25,12 @@ import android.view.View;
 import com.example.googlemaps.PlaceLabeling.setNameLabel;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -99,14 +101,14 @@ public class ChooseLocationOnMap extends AppCompatActivity implements OnMapReady
         // để lấy vị trí hiện tại
         FusedLocationProviderClient fusedLocationProviderClient;
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        Log.e("getDeviceLocation","getMyLocation");
+        Log.e("getDeviceLocation", "getMyLocation");
 
         try {
 
 
-                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
 
             do {
 
@@ -115,6 +117,11 @@ public class ChooseLocationOnMap extends AppCompatActivity implements OnMapReady
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful()) {
+
+                            boolean checkFirstView = false ;
+                            if(myLocation == null){
+                                checkFirstView = true;
+                            }
                             Location location = (Location) getLocation.getResult();
                             if (location == null) {
                                 myLocation = null;
@@ -125,19 +132,30 @@ public class ChooseLocationOnMap extends AppCompatActivity implements OnMapReady
 
                             // Add a marker in myLocation and move the camera
                             myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                            map.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f), 2000, null);
+                            float tilt = 35; // độ nghiêng mới là 45 độ
+                            CameraPosition cameraPosition = new CameraPosition.Builder()
+                                    .target(myLocation)
+                                    .zoom(17f)
+                                    .tilt(tilt)
+                                    .build();
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                            if(checkFirstView == true){
+                                map.animateCamera(cameraUpdate, 10, null);
+                            }else{
+                                map.animateCamera(cameraUpdate, 2000, null);
+                            }
+
                             Log.e("loop", "getDeviceLocation: not null " + String.valueOf(myLocation.latitude));
 
                         }
                     }
                 });
 
-            }while(myLocation.equals(null));
+            } while (myLocation.equals(null));
 
 
-
-        }catch (Exception e){
-            Log.e("GetDeviceLocation",e.getMessage());
+        } catch (Exception e) {
+            Log.e("GetDeviceLocation", e.getMessage());
         }
 
     }

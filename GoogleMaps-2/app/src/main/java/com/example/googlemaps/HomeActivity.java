@@ -444,6 +444,9 @@ public class HomeActivity extends AppCompatActivity implements
                     )
                         Log.d(TAG,"can not get location");
 
+                    if(location == null){
+                        return;
+                    }
                     GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
 
                     mUserLocation.setGeo_point(geoPoint);

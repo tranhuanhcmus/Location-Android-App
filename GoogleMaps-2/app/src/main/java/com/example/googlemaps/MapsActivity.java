@@ -6,6 +6,7 @@ import static android.app.PendingIntent.getActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -28,10 +30,13 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -68,14 +73,17 @@ import com.example.googlemaps.PlaceLabeling.ListLabelAdapterForMap;
 import com.example.googlemaps.PlaceLabeling.ListLabelAdapter;
 import com.example.googlemaps.PlaceLabeling.ListLabelAdapterForMap;
 import com.example.googlemaps.PlaceLabeling.WorkWithSQLiteLabel;
+import com.example.googlemaps.Walking.WalkingActivity;
 import com.example.googlemaps.databinding.ActivityMapsBinding;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -689,8 +697,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         getDeviceLocation();
 
-        LatLng HoChiMinhLocation = new LatLng(10.823099, 106.629662);
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HoChiMinhLocation,15f),2000,null);
+//        LatLng HoChiMinhLocation = new LatLng(10.823099, 106.629662);
+//        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(HoChiMinhLocation,15f),10,null);
 
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
@@ -733,13 +741,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             fi.onMsgFromMainToFrag(infoPlace);
                             frameLayout.setVisibility(View.VISIBLE);
 
-                            List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
-                            if (photoMetadataList != null && photoMetadataList.size() > 0) {
-                                PhotoMetadata photoMetadata = photoMetadataList.get(0);
-                                String photoUrl = photoMetadata.getAttributions();
-
-                                Log.e(TAG, "Photo URL: " + photoUrl);
-                            }
+//                            List<PhotoMetadata> photoMetadataList = place.getPhotoMetadatas();
+//                            if (photoMetadataList != null && photoMetadataList.size() > 0) {
+//                                PhotoMetadata photoMetadata = photoMetadataList.get(0);
+//                                String photoUrl = photoMetadata.getAttributions();
+//
+//                                Log.e(TAG, "Photo URL: " + photoUrl);
+//                            }
 
 
                         }).addOnFailureListener((exception) -> {
@@ -841,56 +849,64 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
 
-
-
-
-
     public synchronized void getDeviceLocation() {
         // để lấy vị trí hiện tại
+        FusedLocationProviderClient fusedLocationProviderClient;
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        Log.e("getDeviceLocation","getMyLocation");
+        Log.e("getDeviceLocation", "getMyLocation");
 
         try {
-            if (checkPermissionLocation) {
-
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    return;
-                }
-                int i = 0;
-
-                do {
-                    Log.e("loop", "getDeviceLocation: " + String.valueOf(i) );
-                    i++;
-                    Task getLocation = fusedLocationProviderClient.getLastLocation();
-                    getLocation.addOnCompleteListener(new OnCompleteListener() {
-                        @Override
-                        public void onComplete(@NonNull Task task) {
-                            if (task.isSuccessful()) {
-                                Location location = (Location) getLocation.getResult();
-                                if (location == null) {
-                                    myLocation = null;
-                                    Log.e("loop", "getDeviceLocation: null");
-                                    return;
-
-                                }
-
-                                // Add a marker in myLocation and move the camera
-                                myLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15f), 2000, null);
-                                Log.e("loop", "getDeviceLocation: not null " + String.valueOf(myLocation.latitude));
-
-                            }
-                        }
-                    });
 
 
-                }while(myLocation.equals(null));
-            }else{
-                getPermissionFromUser();
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
             }
 
-        }catch (Exception e){
-            Log.e("GetDeviceLocation",e.getMessage());
+            do {
+
+                Task getLocation = fusedLocationProviderClient.getLastLocation();
+                getLocation.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+
+                            boolean checkFirstView = false ;
+                            if(myLocation == null){
+                                checkFirstView = true;
+                            }
+                            Location location = (Location) getLocation.getResult();
+                            if (location == null) {
+                                myLocation = null;
+                                Log.e("loop", "getDeviceLocation: null");
+                                return;
+
+                            }
+
+                            // Add a marker in myLocation and move the camera
+                            myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                            CameraPosition cameraPosition = new CameraPosition.Builder()
+                                    .target(myLocation)
+                                    .zoom(17f)
+                                    .build();
+                            CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                            if(checkFirstView == true){
+                                mMap.animateCamera(cameraUpdate, 10, null);
+                            }else{
+                                mMap.animateCamera(cameraUpdate, 2000, null);
+                            }
+
+                            Log.e("loop", "getDeviceLocation: not null " + String.valueOf(myLocation.latitude));
+
+                        }
+                    }
+                });
+
+            } while (myLocation.equals(null));
+
+
+        } catch (Exception e) {
+            Log.e("GetDeviceLocation", e.getMessage());
         }
 
     }
@@ -1178,6 +1194,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
 
+        frameLayout.setVisibility(View.GONE);
+
     }
 
 
@@ -1263,6 +1281,42 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void handleBookMark(View view){
         Intent intent = new Intent(this, BookMarkActivity.class);
         startActivity(intent);
+    }
+
+    public void handleWalkingMode(View view){
+
+        final Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.custom_dialog);
+
+        Window window = dialog.getWindow();
+        if(window == null)
+            return;
+
+        window.setLayout(WindowManager.LayoutParams.MATCH_PARENT,WindowManager.LayoutParams.WRAP_CONTENT);
+        window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        Button cancelButton = window.findViewById(R.id.cancelBtn);
+        Button acceptButton = window.findViewById(R.id.acceptBtn);
+
+        acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getApplicationContext(), WalkingActivity.class);
+                startActivity(intent);
+                dialog.dismiss();
+            }
+        });
+
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+
     }
 
 
@@ -1377,28 +1431,32 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if(view.getId() == findViewById(R.id.car).getId()){
                 sendRequestFindPath(originLocation,destLocation,fi.drivingMode);
 
-                findViewById(R.id.car).setBackgroundColor(Color.parseColor("#66FFFF"));
+                findViewById(R.id.car).setBackgroundResource(R.drawable.custom_traffic_mode);
+               //findViewById(R.id.imageViewCar).setBackgroundColor(R.color.blue1);
 
             }
 
             if(view.getId() == findViewById(R.id.moto).getId()){
                 sendRequestFindPath(originLocation,destLocation,fi.motoMode);
 
-                findViewById(R.id.moto).setBackgroundColor(Color.parseColor("#66FFFF"));
+                findViewById(R.id.moto).setBackgroundResource(R.drawable.custom_traffic_mode);
+                //findViewById(R.id.imageViewMoto).setBackgroundColor(R.color.blue1);
 
             }
 
             if(view.getId() == findViewById(R.id.bus).getId()){
                 sendRequestFindPath(originLocation,destLocation,fi.transitMode);
 
-                findViewById(R.id.bus).setBackgroundColor(Color.parseColor("#66FFFF"));
+                findViewById(R.id.bus).setBackgroundResource(R.drawable.custom_traffic_mode);
+                //findViewById(R.id.imageViewBus).setBackgroundColor(R.color.blue1);
 
             }
 
             if(view.getId() == findViewById(R.id.walk).getId()){
                 sendRequestFindPath(originLocation,destLocation,fi.walkMode);
 
-                findViewById(R.id.walk).setBackgroundColor(Color.parseColor("#66FFFF"));
+                findViewById(R.id.walk).setBackgroundResource(R.drawable.custom_traffic_mode);
+                //findViewById(R.id.imageViewWalk).setBackgroundColor(R.color.blue1);
 
             }
     

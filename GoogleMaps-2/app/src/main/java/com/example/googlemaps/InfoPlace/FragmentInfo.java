@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -106,7 +107,6 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
             @Override
             public void onClick(View view) {
 
-
                 map.originLocation = map.myLocation;
                 map.destLocation = infoPlace.position;
                 map.sendRequestFindPath(map.originLocation, infoPlace.position, motoMode);
@@ -121,6 +121,7 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
                 map.textSearchDest.setText(infoPlace.name);
                 map.textSearchOrigin.setText("");
                 Log.e("BtnDirection", "onClick" );
+
             }
         });
 
@@ -147,11 +148,19 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
                     db.execSQL(query,new Object[]{infoPlace.name, infoPlace.address});
                     btnBookmark.setText("Hủy lưu");
 
+                    // set lại ảnh cho bookmark
+                    Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_remove);
+                    btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
+
                     Toast.makeText(map, "Đã lưu địa điểm vào danh mục đã lưu", Toast.LENGTH_SHORT).show();
                 }else{
                     String query = "delete from table Luu where address=?";
                     db.delete("Luu","address=?",new String[]{infoPlace.address});
                     btnBookmark.setText("Yêu thích");
+
+                    // set lại ảnh cho bookmark
+                    Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_add);
+                    btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
                 }
 
             }
@@ -223,11 +232,19 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         address.setText(infoPlace.address);
         rating.setText("Rating: " + infoPlace.rating);
 
+
+
         if(checkIfBookMarkExist()){
             btnBookmark.setText("Hủy lưu");
+            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_add);
+            btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
+        }else{
+            Drawable drawableBookmark = getResources().getDrawable(R.drawable.ic_bookmark_remove);
+            btnBookmark.setCompoundDrawablesWithIntrinsicBounds(drawableBookmark,null,null,null);
         }
 
     }
+
 
     @Override
     public void onMsgFromMainToFrag(String info) {
@@ -237,11 +254,10 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
 
             linearLayoutFrag2.setVisibility(View.GONE);
             linearLayoutFrag1.setVisibility(View.VISIBLE);
-
-
         }
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onMsgFromMainToFrag(Distance distance, Duration duration) {
         infoPlace.distance = distance;
@@ -254,7 +270,8 @@ public class FragmentInfo extends Fragment implements FragmentCallbacks {
         if(view == null){
             map.trafficMode = motoMode;
             map.timeMoto.setText(infoPlace.duration.text);
-            map.findViewById(R.id.moto).setBackgroundColor(Color.parseColor("#66FFFF"));
+            map.findViewById(R.id.moto).setBackgroundResource(R.drawable.custom_traffic_mode);
+            //map.findViewById(R.id.imageViewMoto).setBackgroundColor(R.color.blue1);
         }
 
         // set text trên icon traffic mode

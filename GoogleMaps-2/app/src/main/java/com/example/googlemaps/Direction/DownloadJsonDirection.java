@@ -25,9 +25,11 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
     private String link;
 
     private String TAG = "downloadJson";
+    String mode = "";
 
     private DIrectionListener listener;
-    public DownloadJsonDirection(DIrectionListener listener){
+    public DownloadJsonDirection(DIrectionListener listener, String mode){
+        this.mode = mode;
         this.listener = listener;
     }
 
@@ -104,8 +106,21 @@ public class DownloadJsonDirection extends AsyncTask<String,Void,String> {
             int valueDistanceFirstStep = distanceFirstStep.getInt("value");
 
             // second step
-            JSONObject secondStepObject = steps.getJSONObject(1);
-            String maneuver = secondStepObject.getString("maneuver");
+            String maneuver = "";
+            JSONObject secondStepObject ;
+            // kiểm tra xem có phải là đoạn đường cuối cùng không
+            if(steps.length() > 1){
+                secondStepObject = steps.getJSONObject(1);
+                Log.e(TAG, "secondStepObject: "+secondStepObject.getString("travel_mode") );
+                if(secondStepObject.has("maneuver")){
+
+                    Log.e(TAG, "mode traffic: "+mode );
+                    Log.e(TAG, "maneuver: !=transit" );
+                    maneuver = secondStepObject.getString("maneuver");
+
+                }
+            }
+
 
             Route route = new Route();
             route.start_address = start_address;

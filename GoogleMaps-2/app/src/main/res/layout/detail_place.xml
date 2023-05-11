@@ -116,7 +116,7 @@
                         android:textSize="14dp"
                         android:textColor="@color/blue1"
                         android:text="Yêu thích"
-                        android:drawableLeft="@drawable/ic_bookmark"
+                        android:drawableLeft="@drawable/ic_bookmark_add"
                         android:background="@drawable/custom_button"
                         android:id="@+id/save"
                         android:layout_marginLeft="20dp"

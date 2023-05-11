@@ -281,11 +281,12 @@
                     android:layout_weight="1"
                     android:orientation="horizontal"
                     android:onClick="onClickTrafficMode"
-                    >
+                    android:gravity="center_horizontal">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@mipmap/ic_car"/>
+                        android:src="@drawable/ic_car"
+                        android:id="@+id/imageViewCar"/>
                     <TextView
                         android:id="@+id/timeCar"
                         android:layout_width="wrap_content"
@@ -304,11 +305,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:onClick="onClickTrafficMode">
+                    android:onClick="onClickTrafficMode"
+                    android:gravity="center_horizontal">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@mipmap/ic_moto"/>
+                        android:src="@drawable/ic_moto"
+                        android:id="@+id/imageViewMoto"/>
                     <TextView
                         android:id="@+id/timeMoto"
                         android:layout_width="wrap_content"
@@ -327,11 +330,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:onClick="onClickTrafficMode">
+                    android:onClick="onClickTrafficMode"
+                    android:gravity="center_horizontal">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@mipmap/ic_bus"/>
+                        android:src="@drawable/ic_bus"
+                        android:id="@+id/imageViewBus"/>
                     <TextView
                         android:id="@+id/timeBus"
                         android:layout_width="wrap_content"
@@ -350,11 +355,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="horizontal"
-                    android:onClick="onClickTrafficMode">
+                    android:onClick="onClickTrafficMode"
+                    android:gravity="center_horizontal">
                     <ImageView
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:src="@mipmap/ic_walk"/>
+                        android:src="@drawable/ic_walk"
+                        android:id="@+id/imageViewWalk"/>
                     <TextView
                         android:id="@+id/timeWalk"
                         android:layout_width="wrap_content"
@@ -423,7 +430,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/listViewSearch"
-            android:background="@color/white"/>
+            android:background="@color/white"
+            android:divider="@null"/>
 
     </LinearLayout>
 
@@ -435,20 +443,34 @@
         android:layout_alignParentRight="true"
         android:layout_margin="15dp"
         android:src="@drawable/ic_gps"
-        android:background="@drawable/custom_gps"
+        android:background="@drawable/custom_mort_hori"
         android:padding="10dp"
         android:onClick="handleGps"
         />
 
     <ImageView
         android:id="@+id/favourite"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
         android:layout_below="@id/gps"
         android:layout_alignParentRight="true"
         android:layout_margin="15dp"
-        android:src="@mipmap/ic_bookmark"
+        android:src="@drawable/ic_bookmarks"
+        android:background="@drawable/custom_mort_hori"
         android:onClick="handleBookMark"
+        />
+
+    <ImageView
+        android:id="@+id/walkingMode"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/favourite"
+        android:layout_alignParentRight="true"
+        android:layout_margin="15dp"
+        android:padding="5dp"
+        android:src="@drawable/ic_walking"
+        android:background="@drawable/custom_mort_hori"
+        android:onClick="handleWalkingMode"
         />
 
 
