@@ -1415,12 +1415,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 polylineOptions = new PolylineOptions().
                         geodesic(true).
                         color(Color.rgb(123, 133, 237)).
-                        width(10);
+                        width(15);
             }else{
                 polylineOptions = new PolylineOptions().
                         geodesic(true).
-                        color(Color.rgb(183, 187, 204)).
-                        width(10);
+                        color(Color.argb(180,183, 187, 204)).
+                        width(15);
             }
             index ++;
 
