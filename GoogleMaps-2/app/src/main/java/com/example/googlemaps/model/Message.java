@@ -1,7 +1,7 @@
 package com.example.googlemaps.model;
 
 import com.google.firebase.firestore.ServerTimestamp;
-
+import com.makeramen.roundedimageview.RoundedImageView;
 import java.util.Date;
 
 public class Message {
@@ -9,6 +9,7 @@ public class Message {
     private User user;
     private String message;
     private String message_id;
+    private String type;
     private @ServerTimestamp
     Date timestamp;
 
@@ -31,12 +32,21 @@ public class Message {
         this.user = user;
     }
 
+
     public String getMessage() {
         return message;
     }
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getMessage_id() {
@@ -51,6 +61,7 @@ public class Message {
         return timestamp;
     }
 
+
     public void setTimestamp(Date timestamp) {
         this.timestamp = timestamp;
     }
@@ -61,6 +72,7 @@ public class Message {
                 "user=" + user +
                 ", message='" + message + '\'' +
                 ", message_id='" + message_id + '\'' +
+                ", type='" + type + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
     }
