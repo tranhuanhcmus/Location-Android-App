@@ -27,14 +27,23 @@
         app:layout_constraintTop_toTopOf="parent"
         >
 
+        <ImageView
+            android:id="@+id/icManeuverGuide1"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginVertical="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_gravity="center_vertical"/>
+
         <TextView
             android:id="@+id/guide1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="20dp"
-            android:layout_marginHorizontal="20dp"
+            android:layout_marginHorizontal="10dp"
             android:textSize="20dp"
-            android:textColor="@color/white"/>
+            android:textColor="@color/white"
+            android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
 
@@ -45,7 +54,15 @@
         android:background="@drawable/custom_guide2"
         app:layout_constraintTop_toBottomOf="@+id/linear1"
         app:layout_constraintStart_toStartOf="parent"
-        >
+        android:id="@id/linear2">
+
+        <ImageView
+            android:id="@+id/icManeuverGuide2"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginVertical="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:layout_gravity="center_vertical"/>
 
         <TextView
             android:id="@+id/guide2"
@@ -54,7 +71,8 @@
             android:textSize="20dp"
             android:textColor="@color/white"
             android:layout_marginVertical="20dp"
-            android:layout_marginHorizontal="20dp"/>
+            android:layout_marginHorizontal="10dp"
+            android:layout_gravity="center_vertical"/>
 
     </LinearLayout>
 

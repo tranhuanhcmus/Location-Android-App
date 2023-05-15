@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.googlemaps.InfoSearching;
 import com.example.googlemaps.MapsActivity;
@@ -52,7 +53,14 @@ public class LabelingActivity extends AppCompatActivity implements ReloadActivit
                     Bundle bundle = new Bundle();
                     bundle.putString("Name",is.getName());
                     intent.putExtras(bundle);
-                    startActivity(intent);
+                    startActivityForResult(intent,1);
+                }else{
+                    Intent intent = new Intent(getApplicationContext(), MapsActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    Bundle bundle = new Bundle();
+                    bundle.putString("fromBookMark", is.getAddress());
+                    intent.putExtras(bundle);
+                    getApplicationContext().startActivity(intent);
                 }
             }
         });
@@ -92,6 +100,8 @@ public class LabelingActivity extends AppCompatActivity implements ReloadActivit
         ListLabelAdapter lla = new ListLabelAdapter(this,list, this::reloadActivity);
         listView.setAdapter(lla);
 
+        Log.e("LabelingActivity", "showListLabel" );
+//        Toast.makeText(this, "ShowListLabel", Toast.LENGTH_SHORT).show();
     }
 
     public void addLabel(View view){
@@ -103,12 +113,17 @@ public class LabelingActivity extends AppCompatActivity implements ReloadActivit
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == 1){
+            if(resultCode == RESULT_OK){
+                recreate();
+            }
+        }
 
-        showListLabel();
     }
 
     @Override
     public void reloadActivity() {
         recreate();
+        Toast.makeText(this, "reload", Toast.LENGTH_SHORT);
     }
 }

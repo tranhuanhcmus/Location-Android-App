@@ -14,6 +14,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.media.Image;
 import android.os.Bundle;
 import android.os.Looper;
 import android.provider.Settings;
@@ -21,6 +22,7 @@ import android.speech.tts.TextToSpeech;
 import android.text.Html;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -122,8 +124,8 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
             @Override
             public void onInit(int i) {
                 if(i != TextToSpeech.ERROR){
-//                    Locale locale = new Locale("vi","VN");
-                    Locale locale =  Locale.ENGLISH;
+                    Locale locale = new Locale("vi","VN");
+                    //Locale locale =  Locale.ENGLISH;
                     textToSpeech.setLanguage(locale);
                 }
             }
@@ -353,6 +355,8 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
         // nếu rồi thì hiển thị giọng nói đầu đoạn đường
         String guideText1 = String.valueOf(Html.fromHtml(routeList.get(0).firstStep,Html.FROM_HTML_MODE_COMPACT));
         guideText1.replace("Đ.","đường ");
+        ImageView imageGuide1 = findViewById(R.id.icManeuverGuide1);
+        imageGuide1.setImageResource(maneuver.findImageManeuver("straight"));
         if(!curRoad.equals(prevRoad)){
 
             check100m = true;
@@ -369,16 +373,18 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                 if(nextManeuver != null){
                     guideText2 = "Sau đó, "+nextManeuver;
                     guide2.setText(guideText2);
-                    guide2.setVisibility(View.VISIBLE);
+                    ImageView imgGuide2 = findViewById(R.id.icManeuverGuide2);
+                    imgGuide2.setImageResource(maneuver.findImageManeuver(routeList.get(0).maneuver));
+                    findViewById(R.id.linear2).setVisibility(View.VISIBLE);
                 }else{
-                    guide2.setVisibility(View.GONE);
+                    findViewById(R.id.linear2).setVisibility(View.GONE);
                 }
 
                 new SpeechTask().execute(guideText1 + "." + guideText2);
             }else{
                 // không thì chỉ đường thôi
                 new SpeechTask().execute(guideText1);
-                guide2.setVisibility(View.GONE);
+                findViewById(R.id.linear2).setVisibility(View.GONE);
             }
 
             prevRoad = curRoad;
@@ -391,7 +397,9 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                 check100m = false;
                 String nextManeuver = maneuver.convertToVietnamese(routeList.get(0).maneuver);
                 String guideText2 = routeList.get(0).distanceFirstStep + " mét nữa "+nextManeuver;
-                guide2.setVisibility(View.VISIBLE);
+                ImageView imgGuide2 = findViewById(R.id.icManeuverGuide2);
+                imgGuide2.setImageResource(maneuver.findImageManeuver(routeList.get(0).maneuver));
+                findViewById(R.id.linear2).setVisibility(View.VISIBLE);
                 new SpeechTask().execute( guideText2);
             }
             // kiểm tra xem đã đến gần đến đoạn đường tiếp theo chưa, nếu < 20m nữa đến đoạn đường tiếp theo thì
@@ -399,7 +407,9 @@ public class GuideByText extends AppCompatActivity implements OnMapReadyCallback
                 check20m = false;
                 String nextManeuver = maneuver.convertToVietnamese(routeList.get(0).maneuver);
                 String guideText2 = "Chuẩn bị "+nextManeuver;
-                guide2.setVisibility(View.VISIBLE);
+                ImageView imgGuide2 = findViewById(R.id.icManeuverGuide2);
+                imgGuide2.setImageResource(maneuver.findImageManeuver(routeList.get(0).maneuver));
+                findViewById(R.id.linear2).setVisibility(View.VISIBLE);
                 new SpeechTask().execute( guideText2);
             }
 

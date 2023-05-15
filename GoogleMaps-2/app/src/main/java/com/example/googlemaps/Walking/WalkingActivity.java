@@ -79,14 +79,14 @@ public class WalkingActivity extends AppCompatActivity implements OnMapReadyCall
         caloTextView = findViewById(R.id.calo);
 
         // chỉnh kiểu hiển thị đường đi cho polyline
-        PatternItem DOT = new Dash(5);
-        PatternItem GAP = new Gap(5);
+        PatternItem DOT = new Dash(10);
+        PatternItem GAP = new Gap(10);
         List<PatternItem> PATTERN = new ArrayList<>();
         PATTERN.add(DOT);
         PATTERN.add(GAP);
 
         polylineOptions = new PolylineOptions()
-                .width(15)
+                .width(10)
                 .color(Color.rgb(165, 178, 176))
                 .pattern(PATTERN);
     }

@@ -184,7 +184,7 @@ public class addLabel extends AppCompatActivity {
                 // Quay về activity trước
                 Intent intentResult = new Intent();
                 setResult(RESULT_OK,intentResult);
-                Log.e("addLabel", "onActivityResult: finish" );
+                Log.e("addLabel", "onActivityResultChooseLocationOnMap: finish" );
                 finish();
             }
         }
@@ -194,6 +194,7 @@ public class addLabel extends AppCompatActivity {
                 // Quay về activity trước
                 Intent intentResult = new Intent();
                 setResult(RESULT_OK,intentResult);
+                Log.e("addLabel", "onActivityResultSetNameLabel: finish" );
                 finish();
             }
         }

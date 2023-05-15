@@ -2,7 +2,7 @@
     <string name="app_name">GoogleMaps</string>
     <string name="title_activity_maps">MapsActivity</string>
 
-    <string name="API_KEY">AIzaSyBi3ZSfrQYfuxVC4ICzI0mSg4gm9gf5XN8</string>
+    <string name="API_KEY">AIzaSyBCP2j02ypzSib5aiiD6zBXwuGLbU3d8qg</string>
 
     <!--Project ID-->
     <string name="ProjectId">silicon-clock-385511</string>
