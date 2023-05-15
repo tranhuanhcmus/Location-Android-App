@@ -2,11 +2,13 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white">
+    android:background="@color/background">
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginBottom="40dp"
+            android:background="@color/background"
             >
 
             <androidx.recyclerview.widget.RecyclerView
@@ -14,12 +16,6 @@
                 android:layout_height="match_parent"
                 android:id="@+id/chatmessage_recycler_view"
               />
-
-
-
-
-
-
         </RelativeLayout>
 
 
@@ -27,7 +23,17 @@
             android:layout_width="match_parent"
             android:layout_height="40dp"
             android:layout_alignParentBottom="true"
-            android:background="@drawable/custom_grey_border">
+            android:background="@color/background">
+
+            <ImageView
+                android:id="@+id/c_send_image_BTN"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/ic_add_a_photo"
+                android:padding="5dp"/>
+
 
             <ImageView
                 android:layout_width="40dp"
@@ -37,17 +43,30 @@
                 android:src="@drawable/send_msg_icon"
                 android:id="@+id/checkmark"/>
 
+
             <EditText
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
                 android:id="@+id/input_message"
-                android:background="@null"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="8dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginEnd="4dp"
+                android:layout_marginRight="7dp"
                 android:layout_toLeftOf="@+id/checkmark"
+                android:layout_toRightOf="@+id/c_send_image_BTN"
+                android:background="@drawable/send_message_et_background"
+                android:cursorVisible="true"
+                android:focusable="true"
                 android:gravity="center_vertical"
-                android:textSize="14sp"
                 android:hint="new message..."
-                android:textColor="@color/black"
-                android:layout_marginLeft="5dp"/>
+                android:padding="6dp"
+                android:textColor="@color/white"
+                android:textColorHint="#AAA1A1"
+                android:textCursorDrawable="@color/white"
+                android:textSize="18sp" />
+            />
+
 
 
         </RelativeLayout>

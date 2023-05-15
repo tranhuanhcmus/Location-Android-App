@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.InputType;
@@ -241,6 +243,7 @@ public class HomeActivity extends AppCompatActivity implements
         return false;
     }
     private void initSupportActionBar() {
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000")));
         setTitle("ChatRooms");
     }
 

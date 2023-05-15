@@ -18,6 +18,8 @@
     <color name="custom_color">#DFDDDD</color>
     <color name="grey">#4F4557</color>
 
+    <color name="background">#16191c</color>
+
     <color name="red1">#af0a0a</color>
     <color name="red2">#c40909</color>
     <color name="red3">#e50909</color>
