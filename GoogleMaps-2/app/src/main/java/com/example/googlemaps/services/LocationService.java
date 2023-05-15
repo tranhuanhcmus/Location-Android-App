@@ -63,9 +63,11 @@ public class LocationService extends Service {
 
             ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(channel);
 
-            Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
-                    .setContentTitle("")
-                    .setContentText("").build();
+        Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle("Location Service")
+                .setContentText("Location Service is running")
+                .setSmallIcon(R.drawable.cwm_logo)
+                .build();
 
             startForeground(1, notification);
 
