@@ -86,6 +86,7 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback, Vi
     private static final int MAP_LAYOUT_STATE_CONTRACTED = 0;
     private static final int MAP_LAYOUT_STATE_EXPANDED = 1;
     private static final int LOCATION_UPDATE_INTERVAL = 3000;
+    private static final int CALL_PERMISSION_REQUEST_CODE =234;
 
     //widgets
     private RecyclerView mUserListRecyclerView;
@@ -153,6 +154,12 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback, Vi
         view.findViewById(R.id.addbutton).setOnClickListener(this);
         username = view.findViewById(R.id.input_usernamess);
 
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+            // Permission already granted, you can proceed with making a call
+        } else {
+            // Permission not granted, request it
+            requestPermissions(new String[]{Manifest.permission.CALL_PHONE}, CALL_PERMISSION_REQUEST_CODE);
+        }
 
         initGoogleMap(savedInstanceState);
 
