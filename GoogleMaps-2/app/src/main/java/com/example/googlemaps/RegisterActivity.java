@@ -31,7 +31,7 @@ public class RegisterActivity extends AppCompatActivity implements
     private static final String TAG = "RegisterActivity";
 
     //widgets
-    private EditText mEmail, mPassword, mConfirmPassword;
+    private EditText mEmail, mPassword, mConfirmPassword,mTelephone;
     private ProgressBar mProgressBar;
 
     //vars
@@ -45,6 +45,8 @@ public class RegisterActivity extends AppCompatActivity implements
         mEmail = (EditText) findViewById(R.id.input_email);
         mPassword = (EditText) findViewById(R.id.input_password);
         mConfirmPassword = (EditText) findViewById(R.id.input_confirm_password);
+        mTelephone =(EditText)findViewById(R.id.input_telephone);
+
         mProgressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         findViewById(R.id.btn_register).setOnClickListener(this);
@@ -60,7 +62,7 @@ public class RegisterActivity extends AppCompatActivity implements
      * @param email
      * @param password
      */
-    public void registerNewEmail(final String email, String password) {
+    public void registerNewEmail(final String email, String password,String telephone) {
 
         showDialog();
 
@@ -77,6 +79,7 @@ public class RegisterActivity extends AppCompatActivity implements
                             User user = new User();
                             user.setEmail(email);
                             user.setUsername(email.substring(0, email.indexOf("@")));
+                            user.setTelephone(telephone);
                             user.setUser_id(FirebaseAuth.getInstance().getUid());
 
                             FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder().build();
@@ -145,7 +148,7 @@ public class RegisterActivity extends AppCompatActivity implements
                 Log.d(TAG, "onClick: attempting to register.");
 
                 //check for null valued EditText fields
-                if (!isEmpty(mEmail.getText().toString())
+                if (!isEmpty(mEmail.getText().toString()) && !isEmpty(mTelephone.getText().toString())
                         && !isEmpty(mPassword.getText().toString())
                         && !isEmpty(mConfirmPassword.getText().toString())) {
 
@@ -153,7 +156,7 @@ public class RegisterActivity extends AppCompatActivity implements
                     if (mPassword.getText().toString().equals(mConfirmPassword.getText().toString())) {
 
                         //Initiate registration task
-                        registerNewEmail(mEmail.getText().toString(), mPassword.getText().toString());
+                        registerNewEmail(mEmail.getText().toString(), mPassword.getText().toString(),mTelephone.getText().toString());
                     } else {
                         Toast.makeText(RegisterActivity.this, "Passwords do not Match", Toast.LENGTH_SHORT).show();
                     }

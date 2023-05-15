@@ -5,6 +5,8 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.InputType;
@@ -19,6 +21,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -58,7 +61,7 @@ public class HomeActivity extends AppCompatActivity implements
         ChatroomRecyclerAdapter.ChatroomRecyclerClickListener {
 
     private static final String TAG = "MainActivity";
-
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 123;
     //widgets
     private ProgressBar mProgressBar;
 
@@ -87,9 +90,25 @@ public class HomeActivity extends AppCompatActivity implements
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        initSupportActionBar();
-        initChatroomRecyclerView();
+        mLocationPermissionGranted=false;
 
+
+
+
+        // Check if the app has permission to access fine location
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request permission
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Permission already granted
+            // You can proceed with accessing the fine location
+        }
+
+
+        initSupportActionBar();
+
+        initChatroomRecyclerView();
+        showPermissionDialog();
     }
 
 //    private boolean checkMapServices() {
@@ -224,6 +243,7 @@ public class HomeActivity extends AppCompatActivity implements
         return false;
     }
     private void initSupportActionBar() {
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000")));
         setTitle("ChatRooms");
     }
 
@@ -288,7 +308,6 @@ public class HomeActivity extends AppCompatActivity implements
                                                     if (!mChatroomIds.contains(chatroom.getChatroom_id())) {
                                                         mChatroomIds.add(chatroom.getChatroom_id());
                                                         mChatrooms.add(chatroom);
-                                                        Toast.makeText(HomeActivity.this, chatroom.getChatroom_id(), Toast.LENGTH_SHORT).show();
                                                     }
                                                 }
                                             }
@@ -433,32 +452,60 @@ public class HomeActivity extends AppCompatActivity implements
             Log.d(TAG,"cant access location");
             return;
         }
-        mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
-            @Override
-            public void onComplete(@NonNull Task<Location> task) {
 
-                if (task.isSuccessful()) {
-                    Location location = task.getResult();
-                    if(
-                            task.getResult()==null
-                    )
-                        Log.d(TAG,"can not get location");
+        if(mLocationPermissionGranted){
+            mFusedLocationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
+                @Override
+                public void onComplete(@NonNull Task<Location> task) {
 
-                    if(location == null){
-                        return;
+                    if (task.isSuccessful()) {
+                        Location location = task.getResult();
+                        if(
+                                task.getResult()==null
+                        )
+                            Log.d(TAG,"can not get location");
+
+                        if(location == null){
+                            return;
+                        }
+
+                        GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
+
+                        mUserLocation.setGeo_point(geoPoint);
+                        mUserLocation.setTimestamp(null);
+                        saveUserLocation();
+//                        startLocationService();
+
                     }
-                    GeoPoint geoPoint = new GeoPoint(location.getLatitude(), location.getLongitude());
-
-                    mUserLocation.setGeo_point(geoPoint);
-                    mUserLocation.setTimestamp(null);
-
-                   saveUserLocation();
-                   startLocationService();
-
+                }
+            });
+        }
+        else{
+            Log.d(TAG, "Not permit: ");
+            DocumentReference locationRef = mDb.collection(getString(R.string.collection_user_locations))
+                    .document(FirebaseAuth.getInstance().getUid());
+            locationRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                    if(task.isSuccessful()){
+                        DocumentSnapshot document = task.getResult();
+                        if (document.contains("geo_point")) {
+                            GeoPoint geoPoint = document.getGeoPoint("geo_point");
+                            if (geoPoint != null) {
+                                Log.d(TAG, "geoPoint from DB: "+geoPoint.toString());
+                                mUserLocation.setGeo_point(geoPoint);
+                                mUserLocation.setTimestamp(null);
+                                saveUserLocation();
+                            }
+                            else Log.d(TAG, "dont have geo_point: ");
+                        }else Log.d(TAG, "dont contains geo_point: ");
+                    }
 
                 }
-            }
-        });
+            });
+
+        }
+
 
     }
     @Override
@@ -531,5 +578,33 @@ public class HomeActivity extends AppCompatActivity implements
         mProgressBar.setVisibility(View.GONE);
     }
 
+    private void showPermissionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose your shared mode");
+        builder.setMessage("Allow share your location?");
+        builder.setPositiveButton("Allow", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+               mLocationPermissionGranted=true;
+               Toast.makeText(getApplicationContext(),"Public location mode",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(),"You can choose private mode again when restart app!",Toast.LENGTH_SHORT).show();
+               startLocationService();
+                dialog.dismiss();
+            }
+        });
+        builder.setNegativeButton("Deny", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Handle denial of permission
+                mLocationPermissionGranted=true;
+                Toast.makeText(getApplicationContext(),"Private location mode",Toast.LENGTH_SHORT).show();
 
+                Toast.makeText(getApplicationContext(),"You can choose private mode again when restart app!",Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
 }
