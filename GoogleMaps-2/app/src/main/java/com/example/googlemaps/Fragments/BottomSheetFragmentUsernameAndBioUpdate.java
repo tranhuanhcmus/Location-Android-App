@@ -71,15 +71,16 @@ public class BottomSheetFragmentUsernameAndBioUpdate extends BottomSheetDialogFr
             mDb.collection(getString(R.string.collection_users))
                     .document(FirebaseAuth.getInstance().getUid())
                     .set(user);
-            dismiss();
+
         }else{
             bio = et_user_input_bottom_sheet_fragment.getText().toString().trim();
             user.setBio(bio);
             mDb.collection(getString(R.string.collection_users))
                     .document(FirebaseAuth.getInstance().getUid())
                     .set(user);
-            dismiss();
+
         }
+        dismiss();
 
 
     }
