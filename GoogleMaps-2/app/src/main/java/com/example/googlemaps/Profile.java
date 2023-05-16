@@ -1,5 +1,6 @@
 package com.example.googlemaps;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +45,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -153,10 +155,8 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
     private void fetchCurrentUserdata() {
         user = ((UserClient) (getApplicationContext())).getUser();
 
-        Log.d(TAG, user.getUsername()+ "dcm may");
         if (user != null) {
             username = user.getUsername();
-            Log.d(TAG, username+ "dcm doan anh may");
            tv_currentUserName_profile_fragment.setText(username);
             imageUrl = user.getAvatar();
             if(user.getBio() != null) {
@@ -247,6 +247,28 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        mDb.collection(getString(R.string.collection_users))
+                .document(FirebaseAuth.getInstance().getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if(task.isSuccessful()){
+                            Log.d(TAG, "onComplete: successfully set the user client.");
+                            User user = task.getResult().toObject(User.class);
+
+                            // set value for another activity
+                            UserClient applicationContext = (UserClient) getApplicationContext();
+                            applicationContext.setUser(user);
+                            //Log.i(TAG,user.toString());
+                            // ((UserClient)((Activity) context).setUser(user);
+                        }
+                    }
+                });
+    }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -256,14 +278,49 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
             imageUri = data.getData();
             uploadImage();
         }
+        if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
+            mDb.collection(getString(R.string.collection_users))
+                    .document(FirebaseAuth.getInstance().getUid())
+                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                            if(task.isSuccessful()){
+                                Log.d(TAG, "onComplete: successfully set the user client.");
+                                user = task.getResult().toObject(User.class);
+                                if (user != null) {
+                                    username = user.getUsername();
+                                    tv_currentUserName_profile_fragment.setText(username);
+                                    imageUrl = user.getAvatar();
+                                    if(user.getBio() != null) {
+
+                                        userBio = user.getBio();
+                                        tv_profile_fragment_bio.setText(userBio);
+
+                                    }
+                                    else{
+                                        tv_profile_fragment_bio.setText("");
+                                    }
+                                    userId = user.getUser_id();
+                                    //iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
+                                    if (imageUrl.equals("default")) {
+                                        iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
+
+                                    } else {
+                                        loadImageChatMessage(iv_profileImage_profile_fragment,imageUrl);
+                                    }
+                                } else {
+                                    Toast.makeText(context, "User not found..", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    });
+        }
     }
 
     private void openBottomSheet(Boolean isUsername) {
         BottomSheetFragmentUsernameAndBioUpdate bottomSheetFragmentUsernameAndBioUpdate = new BottomSheetFragmentUsernameAndBioUpdate(context, isUsername);
         assert getSupportFragmentManager() != null;
         bottomSheetFragmentUsernameAndBioUpdate.show(getSupportFragmentManager(), "edit");
-
-
 
 
 

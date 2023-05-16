@@ -3,9 +3,11 @@ package com.example.googlemaps.Fragments;
 
 import static com.google.maps.android.Context.getApplicationContext;
 
+import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -90,6 +92,11 @@ public class BottomSheetFragmentUsernameAndBioUpdate extends BottomSheetDialogFr
         user = ((UserClient) getActivity().getApplication()).getUser();
     }
 
+    private void reloadData() {
+        Intent resultIntent = new Intent();
+        getActivity().setResult(Activity.RESULT_OK, resultIntent);
+        getActivity().finish();
+    }
     private void init(View view) {
 
         mDb = FirebaseFirestore.getInstance();
@@ -101,6 +108,7 @@ public class BottomSheetFragmentUsernameAndBioUpdate extends BottomSheetDialogFr
             @Override
             public void onClick(View v) {
                 updateUsernameAndBio();
+                reloadData();
             }
         });
 
