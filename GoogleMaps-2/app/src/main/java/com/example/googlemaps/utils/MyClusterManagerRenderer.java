@@ -1,6 +1,10 @@
 package com.example.googlemaps.utils;
 
+import static com.example.googlemaps.utils.ImageLoader.loadImageChatMessage;
+
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.ViewGroup;
@@ -51,7 +55,13 @@ public class MyClusterManagerRenderer extends DefaultClusterRenderer<ClusterMark
     protected void onBeforeClusterItemRendered(ClusterMarker item, MarkerOptions markerOptions) {
 //        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
 
-        imageView.setImageResource(item.getIconPicture());
+
+        if (item.getIconPicture().equals("default")) {
+            imageView.setImageResource(R.drawable.placeholder_image_chat);
+
+        } else {
+            loadImageChatMessage( imageView,item.getIconPicture());
+        }
         Bitmap icon = iconGenerator.makeIcon();
         markerOptions.icon(BitmapDescriptorFactory.fromBitmap(icon)).title(item.getTitle());
 

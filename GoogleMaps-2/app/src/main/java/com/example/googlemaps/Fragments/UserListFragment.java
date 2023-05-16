@@ -263,12 +263,14 @@ public class UserListFragment extends Fragment implements OnMapReadyCallback, Vi
                         snippet = "Determine route to " + userLocation.getUser().getUsername() + "?";
                     }
 
-                    int avatar = R.drawable.avatar; // set the default avatar
-                    try {
-                        avatar = Integer.parseInt(userLocation.getUser().getAvatar());
-                    } catch (NumberFormatException e) {
-                        Log.d(TAG, "addMapMarkers: no avatar for " + userLocation.getUser().getUsername() + ", setting default.");
+                    String avatar = "default";
+
+
+                    if(userLocation.getUser().getAvatar() != null){
+                        avatar = userLocation.getUser().getAvatar();
                     }
+
+
 
                     ClusterMarker newClusterMarker = new ClusterMarker(
                             new LatLng(userLocation.getGeo_point().getLatitude(), userLocation.getGeo_point().getLongitude()),
