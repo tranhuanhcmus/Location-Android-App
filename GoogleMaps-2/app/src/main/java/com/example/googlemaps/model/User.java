@@ -11,6 +11,8 @@ public class User implements Parcelable{
 
     private String telephone;
 
+    private String bio;
+
     public User(String email, String user_id, String username, String avatar,String telephone) {
         this.email = email;
         this.user_id = user_id;
@@ -18,10 +20,19 @@ public class User implements Parcelable{
         this.avatar = avatar;
         this.telephone = telephone;
     }
-
-    public User() {
-
+    public User(){
+        this.avatar = "default";
     }
+    public User(String email, String user_id, String username, String avatar,String telephone,String bio) {
+        this.email = email;
+        this.user_id = user_id;
+        this.username = username;
+        this.avatar = avatar;
+        this.telephone = telephone;
+        this.bio = bio;
+    }
+
+
 
     protected User(Parcel in) {
         email = in.readString();
@@ -29,6 +40,7 @@ public class User implements Parcelable{
         username = in.readString();
         avatar = in.readString();
         telephone = in.readString();
+        bio = in.readString();
     }
 
     public static final Creator<User> CREATOR = new Creator<User>() {
@@ -86,6 +98,13 @@ public class User implements Parcelable{
     public void setUsername(String username) {
         this.username = username;
     }
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
 
     @Override
     public String toString() {
@@ -95,6 +114,7 @@ public class User implements Parcelable{
                 ", username='" + username + '\'' +
                 ", avatar='" + avatar + '\'' +
                 ", telephone='" + telephone + '\'' +
+                ", bio='" + bio + '\'' +
                 '}';
     }
 
@@ -109,5 +129,7 @@ public class User implements Parcelable{
         dest.writeString(user_id);
         dest.writeString(username);
         dest.writeString(avatar);
+        dest.writeString(telephone);
+        dest.writeString(bio);
     }
 }
