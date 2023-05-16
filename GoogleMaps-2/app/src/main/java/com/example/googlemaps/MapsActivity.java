@@ -182,6 +182,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public static LinearLayout linearLayout1;
     public static LinearLayout linearLayout2;
+    public static LinearLayout yourLocation;
 
     public View viewModeTraffic;
 
@@ -289,6 +290,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         timeBus = findViewById(R.id.timeBus);
         timeWalk = findViewById(R.id.timeWalk);
 
+        yourLocation = findViewById(R.id.yourLocation);
+        yourLocation.setVisibility(View.GONE);
         // thiết lập adapter
 
         // check khi ô search thay đổi text
@@ -330,6 +333,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 showHistory(textSearch,hasFocus);
                 convertSearchAndBackSearch(textSearch,hasFocus);
+
 
             }
 
@@ -378,6 +382,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 showHistory(textSearchOrigin,hasFocus);
                 convertSearchAndBackSearch(textSearchOrigin,hasFocus);
+                showYourLocation(textSearchOrigin,hasFocus);
 
             }
         });
@@ -420,6 +425,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 showHistory(textSearchDest,hasFocus);
                 convertSearchAndBackSearch(textSearchDest,hasFocus);
+                showYourLocation(textSearchDest,hasFocus);
 
             }
         });
@@ -605,6 +611,20 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    public void showYourLocation(AutoCompleteTextView textView,boolean hasFocus){
+        if(hasFocus) {
+            yourLocation.setVisibility(View.VISIBLE);
+            yourLocation.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    handleYourLocation(view);
+                }
+            });
+
+        }else{
+            yourLocation.setVisibility(View.GONE);
+        }
+    }
     private void deleteRowHistory(int id){
         db.delete("LichSu","id=?",new String[]{String.valueOf(id)});
     }
@@ -1082,7 +1102,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         textSearchOrigin.clearFocus();
         textSearchDest.clearFocus();
 
-        if(!searchString.equals("")){
+        if(!searchString.equals("Vị trí của bạn")){
             Geocoder geocoder = new Geocoder(MapsActivity.this);
             List<Address> list = new ArrayList<>();
             try{
@@ -1325,6 +1345,62 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    public void handleYourLocation(View view){
+        // click vào vị trí của bạn thì sẽ lấy vị trí hiện tại
+
+        FusedLocationProviderClient fusedLocationProviderClient;
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        Log.e("getDeviceLocation", "getMyLocation");
+
+        try {
+
+
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
+            do {
+
+                Task getLocation = fusedLocationProviderClient.getLastLocation();
+                getLocation.addOnCompleteListener(new OnCompleteListener() {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful()) {
+
+
+                            Location location = (Location) getLocation.getResult();
+                            if (location == null) {
+                                myLocation = null;
+                                Log.e("loop", "getDeviceLocation: null");
+                                return;
+
+                            }
+
+                            // Add a marker in myLocation and move the camera
+                            myLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                            if(textSearchOrigin.isFocused()){
+                                textSearchOrigin.setText("Vị trí của bạn");
+                                geoLocate(textSearchOrigin,"origin");
+                            }else{
+                                textSearchDest.setText("Vị trí của bạn");
+                                geoLocate(textSearchDest,"dest");
+                            }
+
+
+
+                        }
+                    }
+                });
+
+            } while (myLocation.equals(null));
+
+
+        } catch (Exception e) {
+            Log.e("GetDeviceLocation", e.getMessage());
+        }
+    }
+
     public void handleBookMark(View view){
         Intent intent = new Intent(this, BookMarkActivity.class);
         startActivity(intent);
@@ -1407,36 +1483,51 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSuccessFindDirection(List<Route> routeList) {
 
-        int index = 0;
-        for(Route route : routeList){
-            
-            List<LatLng> points = new ArrayList<>();
-            PolylineOptions polylineOptions;
-            if(index == 0){
-                polylineOptions = new PolylineOptions().
-                        geodesic(true).
-                        color(Color.rgb(123, 133, 237)).
-                        width(15);
-            }else{
-                polylineOptions = new PolylineOptions().
-                        geodesic(true).
-                        color(Color.argb(180,183, 187, 204)).
-                        width(15);
-            }
-            index ++;
+        for(int i = 1; i < routeList.size(); i++){
+            Route route = routeList.get(i);
 
-            for(int i = 0; i < route.polyline.size(); i++){
-                polylineOptions.add(route.polyline.get(i));
-                points.add(route.polyline.get(i));
+            //List<LatLng> points = new ArrayList<>();
+            PolylineOptions polylineOptions;
+
+
+            polylineOptions = new PolylineOptions().
+                    geodesic(true).
+                    color(Color.argb(180,183, 187, 204)).
+                    width(15);
+
+
+            for(int j = 0; j < route.polyline.size(); j++){
+                polylineOptions.add(route.polyline.get(j));
+                //points.add(route.polyline.get(j));
 
             }
 
             polyPaths.add(mMap.addPolyline(polylineOptions));
 
-            fi.onMsgFromMainToFrag(route.distance, route.duration);
+            //fi.onMsgFromMainToFrag(route.distance, route.duration);
 
 
         }
+
+        if(routeList.size() > 0){
+            Route route = routeList.get(0);
+
+            PolylineOptions polylineOptions = new PolylineOptions().
+                    geodesic(true).
+                    color(Color.rgb(123, 133, 237)).
+                    width(15);
+
+            for(int i = 0; i < route.polyline.size(); i++){
+                polylineOptions.add(route.polyline.get(i));
+            }
+
+            polyPaths.add(mMap.addPolyline(polylineOptions));
+
+            fi.onMsgFromMainToFrag(route.distance, route.duration);
+        }
+
+
+
         invisibleKeyBoard(textSearch);
 
     }

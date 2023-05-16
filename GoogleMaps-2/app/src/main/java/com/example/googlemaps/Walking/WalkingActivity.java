@@ -79,14 +79,14 @@ public class WalkingActivity extends AppCompatActivity implements OnMapReadyCall
         caloTextView = findViewById(R.id.calo);
 
         // chỉnh kiểu hiển thị đường đi cho polyline
-        PatternItem DOT = new Dash(5);
-        PatternItem GAP = new Gap(5);
+        PatternItem DOT = new Dash(10);
+        PatternItem GAP = new Gap(10);
         List<PatternItem> PATTERN = new ArrayList<>();
         PATTERN.add(DOT);
         PATTERN.add(GAP);
 
         polylineOptions = new PolylineOptions()
-                .width(15)
+                .width(10)
                 .color(Color.rgb(165, 178, 176))
                 .pattern(PATTERN);
     }
@@ -116,8 +116,8 @@ public class WalkingActivity extends AppCompatActivity implements OnMapReadyCall
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         LocationRequest locationRequest = LocationRequest.create()
-                .setInterval(30000)
-                .setFastestInterval(20000)
+                .setInterval(1000)
+                .setFastestInterval(500)
                 .setSmallestDisplacement(0)
                 .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
                 .setPriority(Priority.PRIORITY_BALANCED_POWER_ACCURACY);
@@ -128,6 +128,15 @@ public class WalkingActivity extends AppCompatActivity implements OnMapReadyCall
                 // thêm vị trí vào mảng danh sách các điểm đã đi qua
                 LatLng newPoints = new LatLng(locationResult.getLastLocation().getLatitude()
                         ,locationResult.getLastLocation().getLongitude());
+
+                myLocation = newPoints;
+                CameraPosition cameraPosition = new CameraPosition.Builder()
+                        .target(myLocation)
+                        .zoom(17f)
+                        .build();
+                CameraUpdate cameraUpdate = CameraUpdateFactory.newCameraPosition(cameraPosition);
+                map.animateCamera(cameraUpdate,500,null);
+
                 addAndDrawPolyline(newPoints);
 
                 LatLng lastedLocationWalked;

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="10dp"
+    android:padding="12dp"
     android:orientation="vertical">
 
 
@@ -11,23 +11,36 @@
             android:id="@+id/username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
             android:text="Username"
             android:textColor="@color/Black"
-            android:textSize="15sp" />
+            android:textSize="15sp"
+            android:layout_centerVertical="true"/>
 
         <TextView
             android:id="@+id/email"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
+            android:layout_marginLeft="16dp"
             android:layout_marginTop="5dp"
             android:layout_toRightOf="@+id/username"
-            android:gravity="center"
             android:text="Gmail of User"
             android:textColor="@color/Grey"
             android:textSize="12sp"
-            app:layout_constraintTop_toBottomOf="@+id/username" />
+            app:layout_constraintTop_toBottomOf="@+id/username"
+            android:layout_centerVertical="true"/>
+
+        <ImageButton
+            android:id="@+id/callBtn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="10dp"
+            android:background="@null"
+            android:src="@mipmap/ic_call_round"
+            android:scaleType="fitCenter"
+            />
+
 
 
 </RelativeLayout>
