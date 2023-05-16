@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.googlemaps.Profile;
 import com.example.googlemaps.R;
 import com.example.googlemaps.model.User;
 import com.example.googlemaps.model.UserClient;
@@ -92,10 +93,21 @@ public class BottomSheetFragmentUsernameAndBioUpdate extends BottomSheetDialogFr
         user = ((UserClient) getActivity().getApplication()).getUser();
     }
 
-    private void reloadData() {
-        Intent resultIntent = new Intent();
-        getActivity().setResult(Activity.RESULT_OK, resultIntent);
-        getActivity().finish();
+//    private void reloadData() {
+//        Intent resultIntent = new Intent();
+//        getActivity().setResult(Activity.RESULT_OK, resultIntent);
+//        getActivity().finish();
+//    }
+    private void updateData() {
+        // Thực hiện cập nhật dữ liệu
+
+        // Lấy tham chiếu đến Activity thông qua FragmentManager
+        Profile activity = (Profile) getActivity();
+
+        // Gọi phương thức của Activity để reload dữ liệu
+        if (activity != null) {
+            activity.reloadData();
+        }
     }
     private void init(View view) {
 
@@ -108,7 +120,7 @@ public class BottomSheetFragmentUsernameAndBioUpdate extends BottomSheetDialogFr
             @Override
             public void onClick(View v) {
                 updateUsernameAndBio();
-                reloadData();
+                updateData();
             }
         });
 

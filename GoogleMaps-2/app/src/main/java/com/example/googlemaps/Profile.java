@@ -96,20 +96,36 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
 
         this.context = context;
     }
+
     public Profile() {
 
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case android.R.id.home:{
+                UserListFragment fragment =
+                        (UserListFragment) getSupportFragmentManager().findFragmentByTag("User List");
+                if(fragment != null){
+                    if(fragment.isVisible()){
+                        getSupportFragmentManager().popBackStack();
+                        return true;
+                    }
+                }
                 finish();
+                return true;
+            }
+
+            default:{
+                return super.onOptionsItemSelected(item);
             }
         }
-        return super.onOptionsItemSelected(item);
     }
+
     private void initSupportActionBar() {
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#000000")));
         setTitle("Profile");
     }
@@ -139,13 +155,13 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
         findViewById(R.id.btn_save_edit_username).setOnClickListener(this);
 
 
-
         mDb = FirebaseFirestore.getInstance();
         imageMessageStorageRef = FirebaseStorage.getInstance().getReference().child("messages_image");
         fetchCurrentUserdata();
         initSupportActionBar();
 
     }
+
     @Override
     public void onStart() {
         super.onStart();
@@ -157,15 +173,14 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
 
         if (user != null) {
             username = user.getUsername();
-           tv_currentUserName_profile_fragment.setText(username);
+            tv_currentUserName_profile_fragment.setText(username);
             imageUrl = user.getAvatar();
-            if(user.getBio() != null) {
+            if (user.getBio() != null) {
 
                 userBio = user.getBio();
                 tv_profile_fragment_bio.setText(userBio);
 
-            }
-            else{
+            } else {
                 tv_profile_fragment_bio.setText("");
             }
             userId = user.getUser_id();
@@ -174,7 +189,7 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
                 iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
 
             } else {
-                loadImageChatMessage(iv_profileImage_profile_fragment,imageUrl);
+                loadImageChatMessage(iv_profileImage_profile_fragment, imageUrl);
             }
         } else {
             Toast.makeText(context, "User not found..", Toast.LENGTH_SHORT).show();
@@ -225,7 +240,7 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
                                                 View parentLayout = findViewById(android.R.id.content);
                                                 Snackbar.make(parentLayout, "Something went wrong.", Snackbar.LENGTH_SHORT).show();
                                             }
-                                           // progressDialog.dismiss();
+                                            // progressDialog.dismiss();
                                         }
                                     })
                                     .addOnFailureListener(new OnFailureListener() {
@@ -255,7 +270,7 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
                 .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if(task.isSuccessful()){
+                        if (task.isSuccessful()) {
                             Log.d(TAG, "onComplete: successfully set the user client.");
                             User user = task.getResult().toObject(User.class);
 
@@ -278,51 +293,51 @@ public class Profile extends AppCompatActivity implements View.OnClickListener {
             imageUri = data.getData();
             uploadImage();
         }
-        if (requestCode == 2 && resultCode == Activity.RESULT_OK) {
-            mDb.collection(getString(R.string.collection_users))
-                    .document(FirebaseAuth.getInstance().getUid())
-                    .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                            if(task.isSuccessful()){
-                                Log.d(TAG, "onComplete: successfully set the user client.");
-                                user = task.getResult().toObject(User.class);
-                                if (user != null) {
-                                    username = user.getUsername();
-                                    tv_currentUserName_profile_fragment.setText(username);
-                                    imageUrl = user.getAvatar();
-                                    if(user.getBio() != null) {
 
-                                        userBio = user.getBio();
-                                        tv_profile_fragment_bio.setText(userBio);
+    }
 
-                                    }
-                                    else{
-                                        tv_profile_fragment_bio.setText("");
-                                    }
-                                    userId = user.getUser_id();
-                                    //iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
-                                    if (imageUrl.equals("default")) {
-                                        iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
+    public void reloadData() {
+        mDb.collection(getString(R.string.collection_users))
+                .document(FirebaseAuth.getInstance().getUid())
+                .get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "onComplete: successfully set the user client.");
+                            user = task.getResult().toObject(User.class);
+                            if (user != null) {
+                                username = user.getUsername();
+                                tv_currentUserName_profile_fragment.setText(username);
+                                imageUrl = user.getAvatar();
+                                if (user.getBio() != null) {
 
-                                    } else {
-                                        loadImageChatMessage(iv_profileImage_profile_fragment,imageUrl);
-                                    }
+                                    userBio = user.getBio();
+                                    tv_profile_fragment_bio.setText(userBio);
+
                                 } else {
-                                    Toast.makeText(context, "User not found..", Toast.LENGTH_SHORT).show();
+                                    tv_profile_fragment_bio.setText("");
                                 }
+                                userId = user.getUser_id();
+                                //iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
+                                if (imageUrl.equals("default")) {
+                                    iv_profileImage_profile_fragment.setImageResource(R.drawable.placeholder_image_chat);
+
+                                } else {
+                                    loadImageChatMessage(iv_profileImage_profile_fragment, imageUrl);
+                                }
+                            } else {
+                                Toast.makeText(context, "User not found..", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    });
-        }
+                    }
+                });
+
     }
 
     private void openBottomSheet(Boolean isUsername) {
         BottomSheetFragmentUsernameAndBioUpdate bottomSheetFragmentUsernameAndBioUpdate = new BottomSheetFragmentUsernameAndBioUpdate(context, isUsername);
         assert getSupportFragmentManager() != null;
         bottomSheetFragmentUsernameAndBioUpdate.show(getSupportFragmentManager(), "edit");
-
-
 
 
     }
